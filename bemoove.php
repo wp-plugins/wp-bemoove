@@ -14,7 +14,6 @@ define('WP_BeMoOve__PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('WP_BeMoOve_DELETE_LIMIT', 100000);
 define('WP_BeMoOve_ITEMS_LIMIT', 5);
 define('WP_BeMoOve_SUBDOMAIN', 'wordpress');
-define('WP_BeMoOve_TAG_ATTR_NAME', bemoove_tag);
 
 require_once(WP_BeMoOve__PLUGIN_DIR . 'util/BeMoOveTag.php');
 
@@ -45,7 +44,7 @@ window.onload = function() {
             m_style_width.replace('px', '');
             var m_width = parseInt(m_style_width, 10) * 1.5;
             if (initWidth < m_width) initWidth = m_width;
-    		console.log(initWidth);
+            console.log(initWidth);
         }
 
         var resize = function() {
@@ -77,7 +76,7 @@ window.onload = function() {
 };
 </script>";
 
-    $movies = preg_replace_callback('/\[' . WP_BeMoOve_TAG_ATTR_NAME . '=\".+\"\]/', BeMoOve_shortcode, $text);
+    $movies = preg_replace_callback('/\[' . BeMoOveTag::WP_BeMoOve_TAG_ATTR_NAME . '=\".+\"\]/', BeMoOve_shortcode, $text);
 
     return $jwplayer . $responsive . $movies;
 }

@@ -1,183 +1,185 @@
 <?php
 class BeMoOveTag {
 
-	/** wp_movie_metaのレコードデータ */
-	private $dbData;
+    const WP_BeMoOve_TAG_ATTR_NAME = 'bemoove_tag';
 
-	private $overrideWidth;
+    /** wp_movie_metaのレコードデータ */
+    private $dbData;
 
-	private $overrideHeight;
+    private $overrideWidth;
 
-	function getName() {
+    private $overrideHeight;
 
-		return $this->dbData->name;
-	}
+    function getName() {
 
-	function  isFlagOn() {
+        return $this->dbData->name;
+    }
 
-		return $this->dbData->flag == '1';
-	}
+    function  isFlagOn() {
 
-	function  getVideoHash() {
+        return $this->dbData->flag == '1';
+    }
 
-		return $this->dbData->video_hash;
-	}
+    function  getVideoHash() {
 
-	function getThumbnailFile() {
+        return $this->dbData->video_hash;
+    }
 
-		return $this->dbData->thumbnail_file;
-	}
+    function getThumbnailFile() {
 
-	/**
-	 * サムネイル表示用のファイルパスを取得する。
-	 * ※変更後のURLはユーザ（管理者）入力値であるため、XSSに注意しhtmlエスケープを行ったものを表示する。
-	 * @return string サムネイル表示用のファイルパス
-	 */
-	function getDispThumbnailFile() {
+        return $this->dbData->thumbnail_file;
+    }
 
-		$result
-			 = $this->isThumbnailFileOverridden()
-				? htmlspecialchars($this->getOverrideThumbnailFile())
-				: $this->getThumbnailFile();
+    /**
+     * サムネイル表示用のファイルパスを取得する。
+     * ※変更後のURLはユーザ（管理者）入力値であるため、XSSに注意しhtmlエスケープを行ったものを表示する。
+     * @return string サムネイル表示用のファイルパス
+     */
+    function getDispThumbnailFile() {
 
-		return $result;
-	}
+        $result
+             = $this->isThumbnailFileOverridden()
+                ? htmlspecialchars($this->getOverrideThumbnailFile())
+                : $this->getThumbnailFile();
 
-	function getOverrideThumbnailFile() {
+        return $result;
+    }
 
-		return $this->dbData->override_thumbnail_file;
-	}
+    function getOverrideThumbnailFile() {
 
-	function isThumbnailFileOverridden() {
+        return $this->dbData->override_thumbnail_file;
+    }
 
-		return !empty($this->dbData->override_thumbnail_file);
-	}
+    function isThumbnailFileOverridden() {
 
-	function getVideoWidth() {
+        return !empty($this->dbData->override_thumbnail_file);
+    }
 
-		return $this->dbData->video_width;
-	}
+    function getVideoWidth() {
 
-	function getVideoHeight() {
+        return $this->dbData->video_width;
+    }
 
-		return $this->dbData->video_height;
-	}
+    function getVideoHeight() {
 
-	function  getVideoTime() {
+        return $this->dbData->video_height;
+    }
 
-		return $this->dbData->video_time;
-	}
+    function  getVideoTime() {
 
-	function __construct($dbData){
+        return $this->dbData->video_time;
+    }
 
-		$this->dbData = $dbData;
-	}
+    function __construct($dbData){
 
-	/**
-	 * タグ名[bemoove_tag=hoge(width, height)]からインスタンスを生成する。
-	 * @param $tagStr hoge(width, height)の部分の文字列
-	 * @return BeMoOveTagインスタンス
-	 */
-	static function createInstance($tagStr) {
+        $this->dbData = $dbData;
+    }
 
-		$tagName = $tagStr;
-		$overrideWidth = 0;
-		$overrideHeight = 0;
-		// 表示用の幅と高さが指定されている場合は設定 tagname(width, height) の形式
-		if (strpos($tagStr, '(')) {
-			$tagInfo = preg_split("/[,(]+/", $tagStr);
-			$tagName = $tagInfo[0];
-			$overrideWidth = intval($tagInfo[1]);
-			$overrideHeight = intval($tagInfo[2]);
-		}
+    /**
+     * タグ名[bemoove_tag=hoge(width, height)]からインスタンスを生成する。
+     * @param $tagStr hoge(width, height)の部分の文字列
+     * @return BeMoOveTagインスタンス
+     */
+    static function createInstance($tagStr) {
 
-		// wp_movie_metaテーブルからレコードを取得
-		global $wpdb;
-		$table_name = $wpdb->prefix . 'movie_meta';
-		$get_list = $wpdb->get_results(
-				$wpdb->prepare("SELECT * FROM " . $table_name . " WHERE NAME = %s", $tagName)
-		);
+        $tagName = $tagStr;
+        $overrideWidth = 0;
+        $overrideHeight = 0;
+        // 表示用の幅と高さが指定されている場合は設定 tagname(width, height) の形式
+        if (strpos($tagStr, '(')) {
+            $tagInfo = preg_split("/[,(]+/", $tagStr);
+            $tagName = $tagInfo[0];
+            $overrideWidth = intval($tagInfo[1]);
+            $overrideHeight = intval($tagInfo[2]);
+        }
 
-		$result = new BeMoOveTag($get_list[0]);
-		$result->overrideWidth = $overrideWidth;
-		$result->overrideHeight = $overrideHeight;
-		return $result;
-	}
+        // wp_movie_metaテーブルからレコードを取得
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'movie_meta';
+        $get_list = $wpdb->get_results(
+                $wpdb->prepare("SELECT * FROM " . $table_name . " WHERE NAME = %s", $tagName)
+        );
 
-	/**
-	 * 貼り付けコードを取得する
-	 *
-	 * @param $domainName ドメイン名
-	 * @param $accountId アカウントID
-	 * @param $isIncludePlayer jwplayer.jsを含めるか否か
-	 * @return 貼り付けコード
-	 */
-	function getEmbedSrc($domainName, $accountId, $isIncludePlayer) {
+        $result = new BeMoOveTag($get_list[0]);
+        $result->overrideWidth = $overrideWidth;
+        $result->overrideHeight = $overrideHeight;
+        return $result;
+    }
 
-		$result = "";
-		if ($isIncludePlayer === true) {
-			$result = "<script type=\"text/javascript\"src=\"https://". WP_BeMoOve_SUBDOMAIN. ".behls-lite.jp/js/jwplayer.js\"></script>
+    /**
+     * 貼り付けコードを取得する
+     *
+     * @param $domainName ドメイン名
+     * @param $accountId アカウントID
+     * @param $isIncludePlayer jwplayer.jsを含めるか否か
+     * @return 貼り付けコード
+     */
+    function getEmbedSrc($domainName, $accountId, $isIncludePlayer) {
+
+        $result = "";
+        if ($isIncludePlayer === true) {
+            $result = "<script type=\"text/javascript\"src=\"https://". WP_BeMoOve_SUBDOMAIN. ".behls-lite.jp/js/jwplayer.js\"></script>
 <script type=\"text/javascript\">jwplayer.key=\"GExaQ71lyaswjxyW6fBfmJnwYHwXQ9VI1SSpWNtsQo4=\";</script>\r";
-		}
+        }
 
-		$result .= $this->createTagCore($domainName, $accountId);
-		return $result;
-	}
+        $result .= $this->createTagCore($domainName, $accountId);
+        return $result;
+    }
 
-	/**
-	 * Html表示コピーペースト用の貼り付けコードを取得する
-	 *
-	 * @param $domainName ドメイン名
-	 * @param unknown $accountId アカウントID
-	 * @return Html表示コピーペースト用の貼り付けコード
-	 */
-	function  getSrcForCopyPaste($domainName, $accountId) {
+    /**
+     * Html表示コピーペースト用の貼り付けコードを取得する
+     *
+     * @param $domainName ドメイン名
+     * @param unknown $accountId アカウントID
+     * @return Html表示コピーペースト用の貼り付けコード
+     */
+    function  getSrcForCopyPaste($domainName, $accountId) {
 
-		return htmlspecialchars($this->getEmbedSrc($domainName, $accountId, true));
-	}
+        return htmlspecialchars($this->getEmbedSrc($domainName, $accountId, true));
+    }
 
-	private function createTagCore($domainName, $accountId) {
+    private function createTagCore($domainName, $accountId) {
 
-		$showWidth = (isset($this->overrideWidth) && 0 < $this->overrideWidth) ? $this->overrideWidth : $this->dbData->video_width;
-		$showHeight = (isset($this->overrideHeight) && 0 < $this->overrideHeight) ? $this->overrideHeight : $this->dbData->video_height;
-		$showThumbnailFile = $this->getDispThumbnailFile();
+        $showWidth = (isset($this->overrideWidth) && 0 < $this->overrideWidth) ? $this->overrideWidth : $this->dbData->video_width;
+        $showHeight = (isset($this->overrideHeight) && 0 < $this->overrideHeight) ? $this->overrideHeight : $this->dbData->video_height;
+        $showThumbnailFile = $this->getDispThumbnailFile();
 
-		return "<div id=\"{$this->getName()}\">Loading the player...</div>
+        return "<div id=\"{$this->getName()}\">Loading the player...</div>
 <script type=\"text/javascript\">
-	var isAndroid = false;
-	var isIOS = false;
-	var ua = navigator.userAgent.toLowerCase();
-	if (ua.match(/Android/i)) var isAndroid = true;
-	if (ua.match(/iP(hone|ad|od)/i)) var isIOS = true;
-	if (!isAndroid && !isIOS) {
-		jwplayer({$this->getName()}).setup({
-			file: \"https://{$domainName}.behls-lite.jp/media/video/{$accountId}/{$this->getName()}.m3u8\",
-			image: \"{$showThumbnailFile}\",
-			width: \"{$showWidth}\",
-			height: \"{$showHeight}\"
-		});
-	} else {
-		document.getElementById(\"{$this->getName()}\").innerHTML
-			= \"\"
-			+ \"<video id=myVideo\"
-			+ \" src='https://{$domainName}.behls-lite.jp/media/video/{$account_id}/{$this->getName()}.m3u8' \"
-			+ \" poster='{$showThumbnailFile}' \"
-			+ \" width='{$showWidth}' height='{$showHeight}' \"
-			+ \" controls>\"
-			+ \" </video>\";
-		}
+    var isAndroid = false;
+    var isIOS = false;
+    var ua = navigator.userAgent.toLowerCase();
+    if (ua.match(/Android/i)) var isAndroid = true;
+    if (ua.match(/iP(hone|ad|od)/i)) var isIOS = true;
+    if (!isAndroid && !isIOS) {
+        jwplayer({$this->getName()}).setup({
+            file: \"https://{$domainName}.behls-lite.jp/media/video/{$accountId}/{$this->getName()}.m3u8\",
+            image: \"{$showThumbnailFile}\",
+            width: \"{$showWidth}\",
+            height: \"{$showHeight}\"
+        });
+    } else {
+        document.getElementById(\"{$this->getName()}\").innerHTML
+            = \"\"
+            + \"<video id=myVideo\"
+            + \" src='https://{$domainName}.behls-lite.jp/media/video/{$account_id}/{$this->getName()}.m3u8' \"
+            + \" poster='{$showThumbnailFile}' \"
+            + \" width='{$showWidth}' height='{$showHeight}' \"
+            + \" controls>\"
+            + \" </video>\";
+        }
 </script>";
-	}
+    }
 
-	/**
-	 * 動画一覧画面の一動画あたりの表示情報を作成する。
-	 *
-	 * @param $domainName ドメイン名
-	 * @param unknown $accountId アカウントID
-	 * @return 動画一覧画面の一動画あたりの表示情報
-	 */
-	function createListItemInfo($domainName, $accountId) {
-		return '<div class="movie_listitem_wrap">'
+    /**
+     * 動画一覧画面の一動画あたりの表示情報を作成する。
+     *
+     * @param $domainName ドメイン名
+     * @param unknown $accountId アカウントID
+     * @return 動画一覧画面の一動画あたりの表示情報
+     */
+    function createListItemInfo($domainName, $accountId) {
+        return '<div class="movie_listitem_wrap">'
                     . '<table cellpadding="5" cellspacing="1" bgcolor="#bbbbbb">'
                     . '<tr>'
                     . '<td bgcolor="#fff" width="130" rowspan="7" style="text-align:center;">'
@@ -189,7 +191,7 @@ class BeMoOveTag {
                     . '</td>'
                     . '<td valign="top" bgcolor="#ccc" width="90">貼り付け用タグ</td>'
                     . '<td valign="top" bgcolor="#fff" width="300">'
-                    . '<input type="text" readonly="readonly" value=\'[' . WP_BeMoOve_TAG_ATTR_NAME . '="' . $this->getName() . '"]\'" />'
+                    . '<input type="text" readonly="readonly" value=\'[' . self::WP_BeMoOve_TAG_ATTR_NAME . '="' . $this->getName() . '"]\'" />'
                     . '</td>'
                     . '</tr>'
                     . '<tr>'
@@ -215,6 +217,6 @@ class BeMoOveTag {
                     . '<input type="hidden" value="' . ($this->isFlagOn() ? '1' : '0') . '" class="flag" />'
                     . '<input type="hidden" value="' . $this->getName() . '" class="tag_name" />'
                     . '</div><br />';
-	}
+    }
 }
 ?>

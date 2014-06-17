@@ -1,16 +1,24 @@
 <?php
 require_once(WP_BeMoOve__PLUGIN_DIR . 'util/Rect.php');
+require_once(WP_BeMoOve__PLUGIN_DIR . 'data/WPMovieMetaDataAdapter.php');
+require_once(WP_BeMoOve__PLUGIN_DIR . 'api/BeHLSApiClient.php');
 
 date_default_timezone_set('Asia/Tokyo');
 
 class BeMoOve_Admin_Class {
-    var $table_name;
+
+    private $wPMovieMetaDataAdapter;
+    private function  getWPMovieMetaDataAdapter() {
+
+        return $this->wPMovieMetaDataAdapter;
+    }
 
     function __construct() {
-        global $wpdb;
-        // 接頭辞（wp_）を付けてテーブル名を設定
-        $this->table_name = $wpdb->prefix . 'movie_meta';
-        register_activation_hook (__FILE__, self::cmt_activate($this->table_name));
+
+        $this->wPMovieMetaDataAdapter = new WPMovieMetaDataAdapter();
+
+        // plugin有効化時の処理を設定
+        register_activation_hook (__FILE__, self::cmt_activate($this->wPMovieMetaDataAdapter));
 
         // カスタムフィールドの作成
         add_action('admin_menu', array($this, 'add_pages'));
@@ -27,16 +35,16 @@ class BeMoOve_Admin_Class {
     }
 
     function wp_custom_admin_css() {
-    	$url = WP_BeMoOve__PLUGIN_URL . 'css/style.css';
-    	echo '<!-- custom admin css -->
+        $url = WP_BeMoOve__PLUGIN_URL . 'css/style.css';
+        echo '<!-- custom admin css -->
         <link rel = "stylesheet" href = "'.$url.'" type="text/css" media="all" />
         <!-- /end custom adming css -->';
     }
 
     function includeAdminJs() {
-    	$jsRoot = WP_BeMoOve__PLUGIN_URL . 'js';
-    	print('<script src="' . $jsRoot . '/jquery-1.11.1.min.js" type="text/javascript"></script>'
-        	. '<script src="' . $jsRoot . '/admin.js" type="text/javascript"></script>');
+        $jsRoot = WP_BeMoOve__PLUGIN_URL . 'js';
+        print('<script src="' . $jsRoot . '/jquery-1.11.1.min.js" type="text/javascript"></script>'
+            . '<script src="' . $jsRoot . '/admin.js" type="text/javascript"></script>');
     }
 
     /**
@@ -51,7 +59,7 @@ class BeMoOve_Admin_Class {
             check_admin_referer('BeMoOve_Admin_Page');
             $opt = $_POST['BeMoOve_admin_datas'];
             update_option('BeMoOve_admin_datas', $opt);
-			print('<div class="updated fade"><p style="font-weight: bold;">変更を保存しました。</p></div>');
+            print('<div class="updated fade"><p style="font-weight: bold;">変更を保存しました。</p></div>');
         }
 
         wp_nonce_field('BeMoOve_Admin_Page');
@@ -60,93 +68,104 @@ class BeMoOve_Admin_Class {
         $account_apiprekey = isset($opt['account_apiprekey']) ? $opt['account_apiprekey'] : null;
 
         if (!empty($opt['account_id']) && !empty($opt['account_apiprekey'])) {
-        	$dt = date("YmdHis");
-        	$account_apikey = md5($account_apiprekey . $dt);
-        	$getaccount = file_get_contents('http://'.WP_BeMoOve_SUBDOMAIN.'.behls-lite.jp/account/get/'.$account_id.'/'.$account_apikey.'/'.$dt);
-        	$accountxml = simplexml_load_string($getaccount);
-        	$accountdata = json_decode(json_encode($accountxml), true);
+            $apiClient = new BeHLSApiClient(WP_BeMoOve_SUBDOMAIN, $account_id, $account_apiprekey);
+            $accountdata = $apiClient->getAccount();
 
-        	$max_strage_capacity = $accountdata[getAccount][item][quota] / 1024 / 1024;
-        	$max_strage_capacity = floor($max_strage_capacity * 10);
-        	$max_strage_capacity = $max_strage_capacity / 10;
+            $max_strage_capacity = $accountdata[getAccount][item][quota] / 1024 / 1024;
+            $max_strage_capacity = floor($max_strage_capacity * 10);
+            $max_strage_capacity = $max_strage_capacity / 10;
 
-        	$dispstrage = $accountdata[getAccount][item][disk_used] / 1024 / 1024;
-        	$dispstrage = floor($dispstrage * 10);
-        	$dispstrage = $dispstrage / 10;
+            $dispstrage = $accountdata[getAccount][item][disk_used] / 1024 / 1024;
+            $dispstrage = floor($dispstrage * 10);
+            $dispstrage = $dispstrage / 10;
 
-        	$used_rate = (0 < $max_strage_capacity) ? ($dispstrage * 100 / $max_strage_capacity) : 0;
-        	$used_rate = floor($used_rate * 100);
-        	$used_rate = $used_rate / 100;
+            $used_rate = (0 < $max_strage_capacity) ? ($dispstrage * 100 / $max_strage_capacity) : 0;
+            $used_rate = floor($used_rate * 100);
+            $used_rate = $used_rate / 100;
 
-        	$isAccountActivate = $accountdata[getAccount][item][activate] == 'T';
+            $isAccountActivate = $accountdata[getAccount][item][activate] == 'T';
         }
 
         // 動画の同期処理
         if ($isAccountActivate && $_POST['sync_movies'] == '1') {
-			$dt = date("YmdHis");
-			$account_apikey = md5($account_apiprekey . $dt);
-			$video_list_response = file_get_contents('http://'.WP_BeMoOve_SUBDOMAIN.'.behls-lite.jp/video/list/'.$account_id.'/'.$account_apikey.'/'.$dt);
-			$video_list_xml = simplexml_load_string($video_list_response);
+            $video_list_data = $apiClient->listVideo();
 
-			// 動画が存在しない場合
-			if ($video_list_xml->message->code == '102') {
-				print('<div class="updated fade"><p style="font-weight: bold;">動画ファイルは存在しません。</p></div>');
+            // 動画が存在しない場合
+            if ($video_list_data[message][code] == '102') {
+                print('<div class="updated fade"><p style="font-weight: bold;">動画ファイルは存在しません。</p></div>');
             } else {
+                $video_item_list = $video_list_data[listVideo];
 
-				$video_list_data = json_decode(json_encode($video_list_xml), true);
-				$video_item_list = $video_list_data[listVideo];
+                // APIで取得した動画一覧がWP側のDBにあれば更新、なければ追加を行う。
+                // APIで取得できなかった動画は削除する。
+                // 重複したタグ名がAPIから取得された場合は、先頭に取得してきたもを優先し、後続のものは無視する
+                $wp_movie_records = $this->getWPMovieMetaDataAdapter()->getAllData();
 
-				// APIで取得した動画一覧がWP側のDBにあれば更新、なければ追加を行う。
-				// 重複したタグ名がAPIから取得された場合は、先頭に取得してきたもを優先し、後続のものは無視する
-				global $wpdb;
-				$wp_movie_names = $wpdb->get_results("SELECT name FROM {$this->table_name}");
-				$dealed_movie_names = array();
-				foreach ($video_item_list[item] as $vide_item) {
+                // APIで取得できなかった動画をWP
+                $wp_delete_target = array();
+                foreach ($wp_movie_records as $record) {
+                    $is_delete_target = true;
+                    foreach ($video_item_list[item] as $vide_item) {
+                        if ($vide_item[video][tag] == $record->name) {
+                            $is_delete_target = false;
+                            break;
+                        }
+                    }
 
-					$video_size = explode("x", $vide_item[video][s]);
+                    if ($is_delete_target) {
+                        array_push($wp_delete_target, $record->name);
+                    }
+                }
+                if (0 < count($wp_delete_target)) {
+                    $this->getWPMovieMetaDataAdapter()->deleteByNames($wp_delete_target);
+                }
 
-					// 数値が取得できなかったら更新しない
-					// 新規登録直後には##video_s##という文字列で返却される場合がある
-					if (!is_numeric($video_size[0])) continue;
+                $dealed_movie_names = array();
+                foreach ($video_item_list[item] as $vide_item) {
 
-                	$vide_name = $vide_item[video][tag];
-                	if (in_array($vide_name, $dealed_movie_names)) continue;
-                	array_push($dealed_movie_names, $vide_name);
+                    $video_size = explode("x", $vide_item[video][s]);
 
-					$set_arr = array(
-						'name' => $vide_item[video][tag]
-						, 'hash_name' => $vide_item[video][hash]
-						, 'video_hash' => $vide_item[video][hash]
-						, 'video_file' => $vide_item[video][file_hash]
-						, 'video_width' => $video_size[0]
-						, 'video_height' => $video_size[1]
-						, 'video_time' => $vide_item[video][duration]
-						, 'thumbnail_hash' => $vide_item[thumbnail][hash]
-						, 'thumbnail_file' => $vide_item[thumbnail][file_hash]
-						, 'callback_date' => date('Y-m-d H:i:s')
-						, 'redirectSuccess_code' => 300
-						, 'flag' => '0'
-					);
+                    // 数値が取得できなかったら更新しない
+                    // 新規登録直後には##video_s##という文字列で返却される場合がある
+                    if (!is_numeric($video_size[0])) continue;
 
-					// すでにWP側のDBにあるかをチェック
-					$wp_has_target = false;
-					foreach ($wp_movie_names as $record) {
-						if ($record->name == $vide_name) {
-							$wp_has_target = true;
-							break;
-						}
-					}
+                    $vide_name = $vide_item[video][tag];
+                    if (in_array($vide_name, $dealed_movie_names)) continue;
+                    array_push($dealed_movie_names, $vide_name);
 
-                	if ($wp_has_target) {
-                    	// すでにWP側のDBにある場合
-						$wpdb->update($this->table_name, $set_arr, array('name' => $vide_name));
-                	} else {
-                    	// WP側のDBにない場合
-						$wpdb->insert($this->table_name, $set_arr);
-                	}
-                	$wpdb->show_errors();
-            	}
-            	print('<div class="updated fade"><p style="font-weight: bold;">このアカウントの動画を同期しました。</p></div>');
+                    $set_arr = array(
+                        'name' => $vide_item[video][tag]
+                        , 'hash_name' => $vide_item[video][hash]
+                        , 'video_hash' => $vide_item[video][hash]
+                        , 'video_file' => $vide_item[video][file_hash]
+                        , 'video_width' => $video_size[0]
+                        , 'video_height' => $video_size[1]
+                        , 'video_time' => $vide_item[video][duration]
+                        , 'thumbnail_hash' => $vide_item[thumbnail][hash]
+                        , 'thumbnail_file' => $vide_item[thumbnail][file_hash]
+                        , 'callback_date' => date('Y-m-d H:i:s')
+                        , 'redirectSuccess_code' => 300
+                        , 'flag' => '0'
+                    );
+
+                    // すでにWP側のDBにあるかをチェック
+                    $wp_has_target = false;
+                    foreach ($wp_movie_records as $record) {
+                        if ($record->name == $vide_name) {
+                            $wp_has_target = true;
+                            break;
+                        }
+                    }
+
+                    if ($wp_has_target) {
+                        // すでにWP側のDBにある場合
+                        $this->getWPMovieMetaDataAdapter()->update($set_arr, array('name' => $vide_name));
+                    } else {
+                        // WP側のDBにない場合
+                        $this->getWPMovieMetaDataAdapter()->insert($set_arr);
+                    }
+                }
+                print('<div class="updated fade"><p style="font-weight: bold;">このアカウントの動画を同期しました。</p></div>');
             }
         }
 ?>
@@ -192,8 +211,6 @@ class BeMoOve_Admin_Class {
      * 新規追加メニューの画面表示を行う。
      */
     function BeMoOve_Input_Page() {
-        global $wpdb;
-
         // ファイルアップロード画面の場合
         if ($_GET['m'] == 'file_upload') {
 ?>
@@ -503,32 +520,31 @@ class BeMoOve_Admin_Class {
             $hash_name = isset($_GET['t']) ? $_GET['t'] : null;
             $code = isset($_GET['code']) ? $_GET['code'] : null;
 
-			$set_arr = array(
-				'name' => $name
-				, 'hash_name' => $hash_name
-				, 'redirectSuccess_code' => 300
-				, 'flag' => '1'
-			);
+            $set_arr = array(
+                'name' => $name
+                , 'hash_name' => $hash_name
+                , 'redirectSuccess_code' => 300
+                , 'flag' => '1'
+            );
 
             // 同名のタグがすでにあれば削除した後に追加
-            $same_name_records = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$this->table_name} WHERE name = %s", $name));
+            $same_name_records = $this->getWPMovieMetaDataAdapter()->getDataByName($name);
 
             if ($same_name_records && 0 < count($same_name_records)) {
-				$opt = get_option('BeMoOve_admin_datas');
-				$account_id = isset($opt['account_id']) ? $opt['account_id']: null;
-				$account_apiprekey = isset($opt['account_apiprekey']) ? $opt['account_apiprekey']: null;
-				$dt = date("YmdHis");
-				$account_apikey = md5($account_apiprekey . $dt);
+                $opt = get_option('BeMoOve_admin_datas');
+                $account_id = isset($opt['account_id']) ? $opt['account_id']: null;
+                $account_apiprekey = isset($opt['account_apiprekey']) ? $opt['account_apiprekey']: null;
+
+                $apiClient = new BeHLSApiClient(WP_BeMoOve_SUBDOMAIN, $account_id, $account_apiprekey);
                 foreach ($same_name_records as $snr) {
-					// BeHLs側の古いファイルを削除
-					$buf = file_get_contents("http://".WP_BeMoOve_SUBDOMAIN.".behls-lite.jp/video/remove/{$account_id}/{$account_apikey}/{$dt}/{$snr->video_hash}");
+                    // BeHLs側の古いファイルを削除
+                    $apiClient->removeVideo($snr->video_hash);
                 }
-                $wpdb->query($wpdb->prepare("DELETE FROM $this->table_name WHERE name = %s", $name));
+                $this->getWPMovieMetaDataAdapter()->deleteByName($name);
             }
 
-            $wpdb->insert($this->table_name, $set_arr);
+            $this->getWPMovieMetaDataAdapter()->insert($set_arr);
 
-            $wpdb->show_errors();
 ?>
 <div class="wrap">
     <h2>動画のアップロード</h2>
@@ -575,38 +591,32 @@ class BeMoOve_Admin_Class {
             $opt = get_option('BeMoOve_admin_datas');
             $account_id = isset($opt['account_id']) ? $opt['account_id']: null;
             $account_apiprekey = isset($opt['account_apiprekey']) ? $opt['account_apiprekey']: null;
-            $dt = date("YmdHis");
-            $account_apikey = md5($account_apiprekey . $dt);
+            $apiClient = new BeHLSApiClient(WP_BeMoOve_SUBDOMAIN, $account_id, $account_apiprekey);
             $hash_name = $_GET['hash'];
             $override_thumbnail_file = $_GET['otf'];
 ?>
             <div class="wrap">
             <h2>動画詳細 <a href="admin.php?page=BeMoOve_movies_list" class="add-new-h2">戻る</a></h2>
 <?php
-            global $wpdb;
-            $table_name = $this->table_name;
-
             if ($override_thumbnail_file) {
                 // サムネファイルのURL編集の場合
                 if ($override_thumbnail_file == 'default') {
-					$set_arr = array('override_thumbnail_file' => null);
-					$wpdb->update($table_name, $set_arr, array('video_hash' => $hash_name));
-					print("サムネイルファイルをご登録時のものに戻しました。");
+                    $set_arr = array('override_thumbnail_file' => null);
+                    $this->getWPMovieMetaDataAdapter()->update($set_arr, array('video_hash' => $hash_name));
+                    print("サムネイルファイルをご登録時のものに戻しました。");
                 } else {
-					$set_arr = array('override_thumbnail_file' => $override_thumbnail_file);
-					$wpdb->update($table_name, $set_arr, array('video_hash' => $hash_name));
-					print("サムネイルファイルを変更しました。");
+                    $set_arr = array('override_thumbnail_file' => $override_thumbnail_file);
+                    $this->getWPMovieMetaDataAdapter()->update($set_arr, array('video_hash' => $hash_name));
+                    print("サムネイルファイルを変更しました。");
                 }
             }
 
-            $get_id = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE video_hash = %s", $hash_name));
-            $beMoOveTag = new BeMoOveTag($get_id[0]);
+            $targetVideoHashRecords = $this->getWPMovieMetaDataAdapter()->getDataByVideoHash($hash_name);
+            $beMoOveTag = new BeMoOveTag($targetVideoHashRecords[0]);
             print($beMoOveTag->getEmbedSrc(WP_BeMoOve_SUBDOMAIN, $account_id, true));
             print("<br />");
 
-            $buf = file_get_contents('http://'.WP_BeMoOve_SUBDOMAIN.'.behls-lite.jp/video/get/'.$account_id.'/'.$account_apikey.'/'.$dt.'/'.$hash_name);
-            $xml = simplexml_load_string($buf);
-            $data = json_decode(json_encode($xml), true);
+            $data = $apiClient->getVideo($hash_name);
 
             print('
                 <table cellpadding="5" cellspacing="1" bgcolor="#bbbbbb">
@@ -638,22 +648,19 @@ class BeMoOve_Admin_Class {
                 </table>
             ');
 ?>
-			</div>
+            </div>
 <?php
         // 削除画面の場合
         } elseif ($_GET['m'] == 'delete') {
-            global $wpdb;
+
             $opt = get_option('BeMoOve_admin_datas');
-            $account_id = isset($opt['account_id']) ? $opt['account_id']: null;
-            $account_apiprekey = isset($opt['account_apiprekey']) ? $opt['account_apiprekey']: null;
-            $dt = date("YmdHis");
-            $account_apikey = md5($account_apiprekey . $dt);
+            $account_id = isset($opt['account_id']) ? $opt['account_id'] : null;
+            $account_apiprekey = isset($opt['account_apiprekey']) ? $opt['account_apiprekey'] : null;
+            $apiClient = new BeHLSApiClient(WP_BeMoOve_SUBDOMAIN, $account_id, $account_apiprekey);
 
-            $buf = file_get_contents('http://'.WP_BeMoOve_SUBDOMAIN.'.behls-lite.jp/video/remove/'.$account_id.'/'.$account_apikey.'/'.$dt.'/'.$_GET['hash']);
-            $xml = simplexml_load_string($buf);
-            $data = json_decode(json_encode($xml), true);
-
-            $wpdb->query($wpdb->prepare("DELETE FROM $this->table_name WHERE video_hash = %s", $_GET['hash']));
+            $videoHash = $_GET['hash'];
+            $apiClient->removeVideo($videoHash);
+            $this->getWPMovieMetaDataAdapter()->deleteByVideoHash($videoHash);
 ?>
             <div class="wrap">
             <h2>動画削除</h2>
@@ -668,28 +675,20 @@ class BeMoOve_Admin_Class {
             <div class="wrap">
             <h2>動画一覧 <a href="admin.php?page=BeMoOve_new" class="add-new-h2">新規追加</a></h2>
 <?php
-            global $wpdb;
-
             $offset = 0;
             if (is_numeric($_GET["s"])) {
                 $offset = $_GET["s"];
             }
-            $get_list = $wpdb->get_results(
-            	$wpdb->prepare(
-            		"SELECT * FROM "
-            			. $this->table_name
-            			. " order by movie_id desc limit %d, %d", $offset, WP_BeMoOve_ITEMS_LIMIT)
-            );
+            $get_list = $this->getWPMovieMetaDataAdapter()->getTopDataFromOffset($offset, WP_BeMoOve_ITEMS_LIMIT);
             $page_area = $this -> get_pagination();
 ?>
             <table><tr><td><?php print($page_area); ?></td></tr></table>
 <?php
-			// 動画情報登録処理を行い、その後表示処理を行う。
+            // 動画情報登録処理を行い、その後表示処理を行う。
             $opt = get_option('BeMoOve_admin_datas');
             $account_id = isset($opt['account_id']) ? $opt['account_id']: null;
             $account_apiprekey = isset($opt['account_apiprekey']) ? $opt['account_apiprekey']: null;
-            $dt = date("YmdHis");
-            $account_apikey = md5($account_apiprekey . $dt);
+            $apiClient = new BeHLSApiClient(WP_BeMoOve_SUBDOMAIN, $account_id, $account_apiprekey);
 
             foreach ($get_list as $key => $val) {
 
@@ -697,36 +696,30 @@ class BeMoOve_Admin_Class {
                     // 既にデータがあったら更新しない
                     if ($val->flag == '0') continue;
 
-                    $buf = file_get_contents('http://'.WP_BeMoOve_SUBDOMAIN.'.behls-lite.jp/video/get/'.$account_id.'/'.$account_apikey.'/'.$dt.'/'.$val->name);
-                    if (empty($buf)) continue;
-
-                    $xml = simplexml_load_string($buf);
+                    $data = $apiClient->getVideo($val->name);
 
                     // getできなかったら更新しない
-                    if ($xml->message->code == '102') continue;
+                    if ($data[message] && $data[message][code] == '102') continue;
 
-                    $data = json_decode(json_encode($xml), true);
-                    $size = explode("x", $data['getVideo']['item']['video']['s']);
+                    $size = explode("x", $data[getVideo][item][video][s]);
 
                     // 数値が取得できなかったら更新しない
                     // 新規登録直後には##video_s##という文字列で返却される場合がある
                     if (!is_numeric($size[0])) continue;
 
                     $set_arr = array(
-                        'video_hash' => $data['getVideo']['item']['video']['hash']
-                        , 'video_file' => $data['getVideo']['item']['video']['file_hash']
+                        'video_hash' => $data[getVideo][item][video][hash]
+                        , 'video_file' => $data[getVideo][item][video][file_hash]
                         , 'video_width' => $size[0]
                         , 'video_height' => $size[1]
-                        , 'video_time' => $data['getVideo']['item']['video']['duration']
-                        , 'thumbnail_hash' => $data['getVideo']['item']['thumbnail']['hash']
-                        , 'thumbnail_file' => $data['getVideo']['item']['thumbnail']['file_hash']
+                        , 'video_time' => $data[getVideo][item][video][duration]
+                        , 'thumbnail_hash' => $data[getVideo][item][thumbnail][hash]
+                        , 'thumbnail_file' => $data[getVideo][item][thumbnail][file_hash]
                         , 'callback_date' => date('Y-m-d H:i:s')
                         , 'flag' => '0'
                     );
 
-                    $table_name = $this->table_name;
-                    $wpdb->update($table_name, $set_arr, array('name' => $val->name));
-                    $wpdb->show_errors();
+                    $this->getWPMovieMetaDataAdapter()->update($set_arr, array('name' => $val->name));
                 }
             }
 
@@ -747,54 +740,46 @@ class BeMoOve_Admin_Class {
      * この中でも取得できない場合は、その旨を通知する。
      */
     function get_bemoove_movie_listitem_Info() {
-		global $wpdb;
-		$opt = get_option('BeMoOve_admin_datas');
-		$account_id = isset($opt['account_id']) ? $opt['account_id']: null;
-		$account_apiprekey = isset($opt['account_apiprekey']) ? $opt['account_apiprekey']: null;
-		$dt = date("YmdHis");
-		$account_apikey = md5($account_apiprekey . $dt);
-		$tagName = $_POST["tag_name"];
 
-		$same_name_records = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$this->table_name} WHERE name = %s", $tagName));
-		if (!$same_name_records && count($same_name_records) < 1) die('error');
+        $opt = get_option('BeMoOve_admin_datas');
+        $account_id = isset($opt['account_id']) ? $opt['account_id']: null;
+        $account_apiprekey = isset($opt['account_apiprekey']) ? $opt['account_apiprekey']: null;
+        $apiClient = new BeHLSApiClient(WP_BeMoOve_SUBDOMAIN, $account_id, $account_apiprekey);
+        $tagName = $_POST["tag_name"];
+
+        $same_name_records = $this->getWPMovieMetaDataAdapter()->getDataByName($tagName);
+        if (!$same_name_records && count($same_name_records) < 1) die('error');
 
         $same_name_record = $same_name_records[0];
 
         // 既にデータがあったら更新せずにhtmlを作成して返却
         if ($same_name_record->flag == '0') {
-			$bemooveTag = new BeMoOveTag($same_name_record);
-			die($bemooveTag->createListItemInfo(WP_BeMoOve_SUBDOMAIN, $account_id));
-		}
+            $bemooveTag = new BeMoOveTag($same_name_record);
+            die($bemooveTag->createListItemInfo(WP_BeMoOve_SUBDOMAIN, $account_id));
+        }
 
-        $buf = file_get_contents("http://" . WP_BeMoOve_SUBDOMAIN . ".behls-lite.jp/video/get/{$account_id}/{$account_apikey}/{$dt}/{$tagName}");
-        if (empty($buf)) die('error');
+        $data = $apiClient->getVideo($tagName);
 
-        $xml = simplexml_load_string($buf);
-        if ($xml->message->code == '102') {
-			die('error');
-		}
+        if ($data[message] && $data[message][code] == '102') die('error');
 
-        $data = json_decode(json_encode($xml), true);
-        $size = explode("x", $data['getVideo']['item']['video']['s']);
+        $size = explode("x", $data[getVideo][item][video][s]);
 
         // 数値が取得できなかったら更新しない
         // 新規登録直後には##video_s##という文字列で返却される場合がある
         if (!is_numeric($size[0])) die('error');
 
         $set_arr = array(
-        	'video_hash' => $data[getVideo][item][video][hash]
-        	, 'video_file' => $data[getVideo][item][video][file_hash]
-        	, 'video_width' => $size[0]
-        	, 'video_height' => $size[1]
-        	, 'video_time' => $data[getVideo][item][video][duration]
-        	, 'thumbnail_hash' => $data[getVideo][item][thumbnail][hash]
-        	, 'thumbnail_file' => $data[getVideo][item][thumbnail][file_hash]
-        	, 'callback_date' => date('Y-m-d H:i:s')
-        	, 'flag' => '0'
+            'video_hash' => $data[getVideo][item][video][hash]
+            , 'video_file' => $data[getVideo][item][video][file_hash]
+            , 'video_width' => $size[0]
+            , 'video_height' => $size[1]
+            , 'video_time' => $data[getVideo][item][video][duration]
+            , 'thumbnail_hash' => $data[getVideo][item][thumbnail][hash]
+            , 'thumbnail_file' => $data[getVideo][item][thumbnail][file_hash]
+            , 'callback_date' => date('Y-m-d H:i:s')
+            , 'flag' => '0'
         );
-        $table_name = $this->table_name;
-        $wpdb->update($table_name, $set_arr, array('name' => $tagName));
-        $wpdb->show_errors();
+        $this->getWPMovieMetaDataAdapter()->update($set_arr, array('name' => $tagName));
 
         // メモリーデータ更新
         $same_name_record->video_hash = $set_arr['video_hash'];
@@ -808,46 +793,25 @@ class BeMoOve_Admin_Class {
         $same_name_record->flag = $set_arr['flag'];
 
         $bemooveTag = new BeMoOveTag($same_name_record);
-		die($bemooveTag->createListItemInfo(WP_BeMoOve_SUBDOMAIN, $account_id));
+        die($bemooveTag->createListItemInfo(WP_BeMoOve_SUBDOMAIN, $account_id));
     }
 
-    function cmt_activate($table_name) {
+    function cmt_activate($wPMovieMetaDataAdapter) {
         $cmt_db_version = '1.00';
         $installed_ver = get_option('cmt_meta_version');
         // テーブルのバージョンが違ったら作成
         if ($installed_ver != $cmt_db_version) {
-            $sql = "CREATE TABLE " . $table_name . " (
-                movie_id int(11) NOT NULL AUTO_INCREMENT,
-                name varchar(100) NOT NULL,
-                hash_name varchar(50) NOT NULL,
-                video_hash varchar(50) NOT NULL,
-                video_file varchar(255) NOT NULL,
-                video_width int(5) NOT NULL,
-                video_height int(5) NOT NULL,
-                video_time varchar(20) NOT NULL,
-                thumbnail_hash varchar(50) NOT NULL,
-                thumbnail_file varchar(255) NOT NULL,
-                create_date timestamp on update CURRENT_TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                callback_date timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
-                redirectSuccess_code int(10) NOT NULL DEFAULT '0',
-                override_thumbnail_file varchar(255) NOT NULL,
-                flag int(1) NOT NULL DEFAULT '1',
-                UNIQUE KEY movie_id (movie_id)
-            )
-            CHARACTER SET 'utf8';";
-            require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-            dbDelta($sql);
+            $wPMovieMetaDataAdapter->createTable();
             update_option('cmt_meta_version', $cmt_db_version);
         }
     }
 
     function get_pagination() {
         $m_hr = WP_BeMoOve_ITEMS_LIMIT; //表示最大数
-        global $wpdb;
 
         if ($_GET["s"] == "") $_GET["s"] = 0;
 
-        $max = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM " . $this->table_name, 0));
+        $max = $this->getWPMovieMetaDataAdapter()->getCount();
         $start = $_GET['s'];
         $page = $max / $m_hr;
         $end = $start + $m_hr;
@@ -901,8 +865,8 @@ class BeMoOve_Admin_Class {
              <li>
     ６、動画一覧(BeMoOveをクリック)から貼り付け用タグをコピーして記事に貼り付け<br />
     ※貼り付け時に縦横サイズの比率を指定することもできます。<br />
-    例）[<?php print(WP_BeMoOve_TAG_ATTR_NAME) ?>="sample"]の場合<br />
-    [<?php print(WP_BeMoOve_TAG_ATTR_NAME) ?>="sample(320, 240)"]と記述することで、<br />320×240のサイズで表示することができます。<br />
+    例）[<?php print(BeMoOveTag::WP_BeMoOve_TAG_ATTR_NAME) ?>="sample"]の場合<br />
+    [<?php print(BeMoOveTag::WP_BeMoOve_TAG_ATTR_NAME) ?>="sample(320, 240)"]と記述することで、<br />320×240のサイズで表示することができます。<br />
     ※動画詳細画面よりサムネイル画像を変更することも可能です。<br />
     サムネイル画像のURLを指定することで、その画像をサムネイルとしてご使用いただけます。<br />
     メディアファイルのアップロード等をご活用ください。
