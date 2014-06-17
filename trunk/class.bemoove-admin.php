@@ -65,9 +65,19 @@ class BeMoOve_Admin_Class {
         	$getaccount = file_get_contents('http://'.WP_BeMoOve_SUBDOMAIN.'.behls-lite.jp/account/get/'.$account_id.'/'.$account_apikey.'/'.$dt);
         	$accountxml = simplexml_load_string($getaccount);
         	$accountdata = json_decode(json_encode($accountxml), true);
+
+        	$max_strage_capacity = $accountdata[getAccount][item][quota] / 1024 / 1024;
+        	$max_strage_capacity = floor($max_strage_capacity * 10);
+        	$max_strage_capacity = $max_strage_capacity / 10;
+
         	$dispstrage = $accountdata[getAccount][item][disk_used] / 1024 / 1024;
-        	$dispstrage = floor($dispstrage*10);
-        	$dispstrage = $dispstrage/10;
+        	$dispstrage = floor($dispstrage * 10);
+        	$dispstrage = $dispstrage / 10;
+
+        	$used_rate = (0 < $max_strage_capacity) ? ($dispstrage * 100 / $max_strage_capacity) : 0;
+        	$used_rate = floor($used_rate * 100);
+        	$used_rate = $used_rate / 100;
+
         	$isAccountActivate = $accountdata[getAccount][item][activate] == 'T';
         }
 
@@ -155,10 +165,7 @@ class BeMoOve_Admin_Class {
                 </tr>
 <?php
             if (!empty($opt['account_id']) && !empty($opt['account_apiprekey'])) {
-                echo '<tr valign="top">
-                          <th>ストレージ使用量</th>
-                          <td>' . $dispstrage . 'MB</td>
-                      </tr>';
+                echo "<tr valign=\"top\"><th>ストレージ使用率</th><td>{$used_rate}%&nbsp;({$dispstrage}&nbsp;/&nbsp;{$max_strage_capacity}&nbsp;MB)</td></tr>";
             }
 ?>
             </table>
