@@ -1,4 +1,4 @@
-=== WP Multibyte Patch ===
+=== WP BeMoOve ===
 Contributors: ビムーブ株式会社 (BeMoOve Co.,Ltd)
 Tags: BeMoOve,bemoove,Japanese,Video,Movie
 Requires at least: 3.9-RC1
