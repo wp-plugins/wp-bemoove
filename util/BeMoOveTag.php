@@ -162,7 +162,7 @@ class BeMoOveTag {
         document.getElementById(\"{$this->getName()}\").innerHTML
             = \"\"
             + \"<video id=myVideo\"
-            + \" src='https://{$domainName}.behls-lite.jp/media/video/{$account_id}/{$this->getName()}.m3u8' \"
+            + \" src='https://{$domainName}.behls-lite.jp/media/video/{$accountId}/{$this->getName()}.m3u8' \"
             + \" poster='{$showThumbnailFile}' \"
             + \" width='{$showWidth}' height='{$showHeight}' \"
             + \" controls>\"
