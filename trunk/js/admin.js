@@ -43,6 +43,12 @@ $(function() {
         movie_listitem_wrap.each(function() {
             // すでに取得済みの場合はスキップ
             var wrap = $(this);
+
+            // input要素にクリック時にテキストを全選択できるように修正
+            wrap.find('.copy').on('click', function(){
+                $(this).select();
+            })
+
             if (wrap.find('input.flag').val() != 1) return;
 
             var get_movie_listitem_with_ajax = function() {
@@ -69,7 +75,7 @@ $(function() {
     // サムネイル画像URLの編集
     var link_thumbnail_edit = $('#link_thumbnail_edit');
     if (link_thumbnail_edit && link_thumbnail_edit.length) {
-        link_thumbnail_edit.click(function() {
+        link_thumbnail_edit.on('click', function() {
             var url = prompt('変更したいサムネイルのURLを入力してください');
             if (!url) return false;
 

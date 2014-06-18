@@ -619,30 +619,30 @@ class BeMoOve_Admin_Class {
             $data = $apiClient->getVideo($hash_name);
 
             print('
-                <table cellpadding="5" cellspacing="1" bgcolor="#bbbbbb">
-                    <tr><td bgcolor="#ccc" colspan="2">VIDEO</td></tr>
-                    <tr><td bgcolor="#ccc" width="90">tag</td><td bgcolor="#fff" width="300">'.$data['getVideo']['item']['video']['tag'].'</td></tr>
-                    <tr><td bgcolor="#ccc" width="90">hash</td><td bgcolor="#fff" width="300">'.$data['getVideo']['item']['video']['hash'].'</td></tr>
-                    <tr><td bgcolor="#ccc" width="90">file_tag</td><td bgcolor="#fff" width="300">'.$data['getVideo']['item']['video']['file_tag'].'</td></tr>
-                    <tr><td bgcolor="#ccc" width="90">file_hash</td><td bgcolor="#fff" width="300">'.$data['getVideo']['item']['video']['file_hash'].'</td></tr>
-                    <tr><td bgcolor="#ccc" width="90">file_path</td><td bgcolor="#fff" width="300">'.$data['getVideo']['item']['video']['file_path'].'</td></tr>
-                    <tr><td bgcolor="#ccc" width="90">size</td><td bgcolor="#fff" width="300">'.$data['getVideo']['item']['video']['size'].'</td></tr>
-                    <tr><td bgcolor="#ccc" width="90">duration</td><td bgcolor="#fff" width="300">'.$data['getVideo']['item']['video']['duration'].'</td></tr>
-                    <tr><td bgcolor="#ccc" width="90">convert_time</td><td bgcolor="#fff" width="300">'.$data['getVideo']['item']['video']['convert_time'].'</td></tr>
-                    <tr><td bgcolor="#ccc" width="90">s</td><td bgcolor="#fff" width="300">'.$data['getVideo']['item']['video']['s'].'</td></tr>
-                    <tr><td bgcolor="#ccc" width="90">aspect</td><td bgcolor="#fff" width="300">'.$data['getVideo']['item']['video']['aspect'].'</td></tr>
-                    <tr><td bgcolor="#ccc" width="90">r</td><td bgcolor="#fff" width="300">'.$data['getVideo']['item']['video']['r'].'</td></tr>
-                    <tr><td bgcolor="#ccc" width="90">b</td><td bgcolor="#fff" width="300">'.$data['getVideo']['item']['video']['b'].'</td></tr>
-                    <tr><td bgcolor="#ccc" width="90">ar</td><td bgcolor="#fff" width="300">'.$data['getVideo']['item']['video']['ar'].'</td></tr>
-                    <tr><td bgcolor="#ccc" width="90">ab</td><td bgcolor="#fff" width="300">'.$data['getVideo']['item']['video']['ab'].'</td></tr>
-                    <tr><td bgcolor="#ccc" width="90">ac</td><td bgcolor="#fff" width="300">'.$data['getVideo']['item']['video']['ac'].'</td></tr>
-                    <tr><td bgcolor="#ccc" width="90">profile</td><td bgcolor="#fff" width="300">'.$data['getVideo']['item']['video']['profile'].'</td></tr>
-                    <tr><td bgcolor="#ccc" width="90">level</td><td bgcolor="#fff" width="300">'.$data['getVideo']['item']['video']['level'].'</td></tr>
-                    <tr><td bgcolor="#ccc" width="90">created_at</td><td bgcolor="#fff" width="300">'.$data['getVideo']['item']['video']['created_at'].'</td></tr>
-                    <tr><td bgcolor="#ccc" colspan="2">THUMBNAIL</td></tr>
-                    <tr><td bgcolor="#ccc" width="90">file_path</td><td bgcolor="#fff" width="300">'
+                <table cellpadding="5" cellspacing="1" style="background-color: #bbbbbb;">
+                    <tr><td colspan="2" style="background-color: #ccc;">VIDEO</td></tr>
+                    <tr><td style="background-color: #ccc; width: 90px;">tag</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['tag'].'</td></tr>
+                    <tr><td style="background-color: #ccc; width: 90px;">hash</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['hash'].'</td></tr>
+                    <tr><td style="background-color: #ccc; width: 90px;">file_tag</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['file_tag'].'</td></tr>
+                    <tr><td style="background-color: #ccc; width: 90px;">file_hash</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['file_hash'].'</td></tr>
+                    <tr><td style="background-color: #ccc; width: 90px;">file_path</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['file_path'].'</td></tr>
+                    <tr><td style="background-color: #ccc; width: 90px;">size</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['size'].'</td></tr>
+                    <tr><td style="background-color: #ccc; width: 90px;">duration</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['duration'].'</td></tr>
+                    <tr><td style="background-color: #ccc; width: 90px;">convert_time</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['convert_time'].'</td></tr>
+                    <tr><td style="background-color: #ccc; width: 90px;">s</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['s'].'</td></tr>
+                    <tr><td style="background-color: #ccc; width: 90px;">aspect</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['aspect'].'</td></tr>
+                    <tr><td style="background-color: #ccc; width: 90px;">r</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['r'].'</td></tr>
+                    <tr><td style="background-color: #ccc; width: 90px;">b</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['b'].'</td></tr>
+                    <tr><td style="background-color: #ccc; width: 90px;">ar</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['ar'].'</td></tr>
+                    <tr><td style="background-color: #ccc; width: 90px;">ab</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['ab'].'</td></tr>
+                    <tr><td style="background-color: #ccc; width: 90px;">ac</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['ac'].'</td></tr>
+                    <tr><td style="background-color: #ccc; width: 90px;">profile</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['profile'].'</td></tr>
+                    <tr><td style="background-color: #ccc; width: 90px;">level</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['level'].'</td></tr>
+                    <tr><td style="background-color: #ccc; width: 90px;">created_at</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['created_at'].'</td></tr>
+                    <tr><td colspan="2" style="background-color: #ccc;">THUMBNAIL</td></tr>
+                    <tr><td style="background-color: #ccc; width: 90px;">file_path</td><td style="background-color: #fff; width: 300px;">'
                       . ($beMoOveTag->isThumbnailFileOverridden() ? $beMoOveTag->getDispThumbnailFile() :$data['getVideo']['item']['thumbnail']['file_path']) . '</td></tr>
-                    <tr><td bgcolor="#ccc" width="90"></td><td bgcolor="#fff" width="300" style="text-align: right;">'
+                    <tr><td style="background-color: #ccc; width: 90px;"></td><td style="background-color: #fff; width: 300px; text-align: right;">'
                       . ($beMoOveTag->isThumbnailFileOverridden() ? '<a id="link_thumbnail_default" href="admin.php?page=BeMoOve_movies_list&m=details&hash='. $hash_name .'&otf=default">サムネイルを元に戻す</a>&nbsp;&nbsp;&nbsp;&nbsp;' : '')
                       . '<a id="link_thumbnail_edit" href="admin.php?page=BeMoOve_movies_list&m=details&hash='. $hash_name .'&otf=">サムネイルを変更する</a></td></tr>
                 </table>
