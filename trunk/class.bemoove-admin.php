@@ -13,6 +13,18 @@ class BeMoOve_Admin_Class {
         return $this->wPMovieMetaDataAdapter;
     }
 
+    private $userAccountInfo;
+    private function getUserAccountInfo() {
+        if (isset($this->userAccountInfo)) return $this->userAccountInfo;
+
+        $this->userAccountInfo = UserAccountInfo::getInstance();
+        return $this->userAccountInfo;
+    }
+    private function setUserAccountInfo($userAccountInfo) {
+
+        $this->userAccountInfo = $userAccountInfo;
+    }
+
     function __construct() {
 
         $this->wPMovieMetaDataAdapter = new WPMovieMetaDataAdapter();
@@ -55,20 +67,21 @@ class BeMoOve_Admin_Class {
         $isAccountActivate = false; // アクティブなアカウントか否か
 
         // アカウント設定保存ボタン押下時
-        if (isset($_POST['BeMoOve_admin_datas'])) {
+        if (isset($_POST[UserAccountInfo::OPTION_KEY])) {
             check_admin_referer('BeMoOve_Admin_Page');
-            $opt = $_POST['BeMoOve_admin_datas'];
-            update_option('BeMoOve_admin_datas', $opt);
+            $opt = $_POST[UserAccountInfo::OPTION_KEY];
+            $userAccountInfo = UserAccountInfo::createInstance(
+                $opt[UserAccountInfo::ACCOUNT_ID_PARAM_KEY]
+                , $opt[UserAccountInfo::ACCOUNT_APIPREKEY_PARAM_KEY]
+            );
+            $this->setUserAccountInfo($userAccountInfo);
             print('<div class="updated fade"><p style="font-weight: bold;">変更を保存しました。</p></div>');
         }
 
-        wp_nonce_field('BeMoOve_Admin_Page');
-        $opt = get_option('BeMoOve_admin_datas');
-        $account_id = isset($opt['account_id']) ? $opt['account_id'] : null;
-        $account_apiprekey = isset($opt['account_apiprekey']) ? $opt['account_apiprekey'] : null;
-
-        if (!empty($opt['account_id']) && !empty($opt['account_apiprekey'])) {
-            $apiClient = new BeHLSApiClient(WP_BeMoOve_SUBDOMAIN, $account_id, $account_apiprekey);
+        $accountId = $this->getUserAccountInfo()->getAccountId();
+        $accountApipreKey = $this->getUserAccountInfo()->getAccountApiprekey();
+        if (!empty($accountId) && !empty($accountApipreKey)) {
+            $apiClient = new BeHLSApiClient($this->getUserAccountInfo());
             $accountdata = $apiClient->getAccount();
 
             $max_strage_capacity = $accountdata[getAccount][item][quota] / 1024 / 1024;
@@ -172,19 +185,24 @@ class BeMoOve_Admin_Class {
         <div class="wrap">
         <h2>アカウント設定</h2>
         <form action="" method="post">
+            <?php wp_nonce_field('BeMoOve_Admin_Page'); ?>
             <table class="form-table">
-                <tr valign="top">
-                    <th scope="row"><label for="inputtext3">account_id</label></th>
-                    <td><input name="BeMoOve_admin_datas[account_id]" type="text" id="inputtext3" value="<?php echo $account_id ?>" class="regular-text" /></td>
+                <tr>
+                    <th><label for="inputtext3">account_id</label></th>
+                    <td><input name="<?php print(UserAccountInfo::OPTION_KEY . '[' . UserAccountInfo::ACCOUNT_ID_PARAM_KEY . ']') ?>"
+                               type="text" id="inputtext3" class="regular-text"
+                               value="<?php print($this->getUserAccountInfo()->getAccountId()) ?>" /></td>
                 </tr>
 
-                <tr valign="top">
-                    <th scope="row"><label for="inputtext4">account_apiprekey</label></th>
-                    <td><input name="BeMoOve_admin_datas[account_apiprekey]" type="text" id="inputtext4" value="<?php echo $account_apiprekey ?>" class="regular-text" /></td>
+                <tr>
+                    <th><label for="inputtext4">account_apiprekey</label></th>
+                    <td><input name="<?php print(UserAccountInfo::OPTION_KEY . '[' . UserAccountInfo::ACCOUNT_APIPREKEY_PARAM_KEY . ']') ?>"
+                               type="text" id="inputtext4" class="regular-text"
+                               value="<?php print($this->getUserAccountInfo()->getAccountApiprekey()) ?>" /></td>
                 </tr>
 <?php
-            if (!empty($opt['account_id']) && !empty($opt['account_apiprekey'])) {
-                echo "<tr valign=\"top\"><th>ストレージ使用率</th><td>{$used_rate}%&nbsp;({$dispstrage}&nbsp;/&nbsp;{$max_strage_capacity}&nbsp;MB)</td></tr>";
+            if ($isAccountActivate === true) {
+                echo "<tr><th>ストレージ使用率</th><td>{$used_rate}%&nbsp;({$dispstrage}&nbsp;/&nbsp;{$max_strage_capacity}&nbsp;MB)</td></tr>";
             }
 ?>
             </table>
@@ -228,12 +246,11 @@ class BeMoOve_Admin_Class {
             if (!$video_tag) {
                 $video_tag = $_GET['movie_name'];
             }
-            $subdomain = WP_BeMoOve_SUBDOMAIN;
             $is_detail = $_GET['fuo'] == 'detail';
 
             if ($video_tag) {
 ?>
-                <form action="https://<?php echo $subdomain; ?>.behls-lite.jp/video/upload" method="post" enctype="multipart/form-data">
+                <form action="https://<?php print($this->getUserAccountInfo()->getBehlsHost()); ?>/video/upload" method="post" enctype="multipart/form-data">
                     <input type="hidden" name="id" value="<?php print($account_id); ?>" />
                     <input type="hidden" name="apikey" value="<?php print($account_apikey); ?>" />
                     <input type="hidden" name="dt" value="<?php print($dt); ?>" />
@@ -531,11 +548,7 @@ class BeMoOve_Admin_Class {
             $same_name_records = $this->getWPMovieMetaDataAdapter()->getDataByName($name);
 
             if ($same_name_records && 0 < count($same_name_records)) {
-                $opt = get_option('BeMoOve_admin_datas');
-                $account_id = isset($opt['account_id']) ? $opt['account_id']: null;
-                $account_apiprekey = isset($opt['account_apiprekey']) ? $opt['account_apiprekey']: null;
-
-                $apiClient = new BeHLSApiClient(WP_BeMoOve_SUBDOMAIN, $account_id, $account_apiprekey);
+                $apiClient = new BeHLSApiClient($this->getUserAccountInfo());
                 foreach ($same_name_records as $snr) {
                     // BeHLs側の古いファイルを削除
                     $apiClient->removeVideo($snr->video_hash);
@@ -588,10 +601,7 @@ class BeMoOve_Admin_Class {
     function BeMoOve_Movies_List_Page() {
         // 詳細画面の場合
         if ($_GET['m'] == 'details') {
-            $opt = get_option('BeMoOve_admin_datas');
-            $account_id = isset($opt['account_id']) ? $opt['account_id']: null;
-            $account_apiprekey = isset($opt['account_apiprekey']) ? $opt['account_apiprekey']: null;
-            $apiClient = new BeHLSApiClient(WP_BeMoOve_SUBDOMAIN, $account_id, $account_apiprekey);
+            $apiClient = new BeHLSApiClient($this->getUserAccountInfo());
             $hash_name = $_GET['hash'];
             $override_thumbnail_file = $_GET['otf'];
 ?>
@@ -613,7 +623,7 @@ class BeMoOve_Admin_Class {
 
             $targetVideoHashRecords = $this->getWPMovieMetaDataAdapter()->getDataByVideoHash($hash_name);
             $beMoOveTag = new BeMoOveTag($targetVideoHashRecords[0]);
-            print($beMoOveTag->getEmbedSrc(WP_BeMoOve_SUBDOMAIN, $account_id, true));
+            print($beMoOveTag->getEmbedSrc($this->getUserAccountInfo(), true));
             print("<br />");
 
             $data = $apiClient->getVideo($hash_name);
@@ -653,10 +663,7 @@ class BeMoOve_Admin_Class {
         // 削除画面の場合
         } elseif ($_GET['m'] == 'delete') {
 
-            $opt = get_option('BeMoOve_admin_datas');
-            $account_id = isset($opt['account_id']) ? $opt['account_id'] : null;
-            $account_apiprekey = isset($opt['account_apiprekey']) ? $opt['account_apiprekey'] : null;
-            $apiClient = new BeHLSApiClient(WP_BeMoOve_SUBDOMAIN, $account_id, $account_apiprekey);
+            $apiClient = new BeHLSApiClient($this->getUserAccountInfo());
 
             $videoHash = $_GET['hash'];
             $apiClient->removeVideo($videoHash);
@@ -685,10 +692,7 @@ class BeMoOve_Admin_Class {
             <table><tr><td><?php print($page_area); ?></td></tr></table>
 <?php
             // 動画情報登録処理を行い、その後表示処理を行う。
-            $opt = get_option('BeMoOve_admin_datas');
-            $account_id = isset($opt['account_id']) ? $opt['account_id']: null;
-            $account_apiprekey = isset($opt['account_apiprekey']) ? $opt['account_apiprekey']: null;
-            $apiClient = new BeHLSApiClient(WP_BeMoOve_SUBDOMAIN, $account_id, $account_apiprekey);
+            $apiClient = new BeHLSApiClient($this->getUserAccountInfo());
 
             foreach ($get_list as $key => $val) {
 
@@ -726,7 +730,7 @@ class BeMoOve_Admin_Class {
             // 動画一覧表示処理
             foreach ($get_list as $key => $val) {
                 $beMoOveTag = new BeMoOveTag($val);
-                print($beMoOveTag->createListItemInfo(WP_BeMoOve_SUBDOMAIN, $account_id));
+                print($beMoOveTag->createListItemInfo($this->getUserAccountInfo()));
             }
 ?>
             </div>
@@ -741,10 +745,7 @@ class BeMoOve_Admin_Class {
      */
     function get_bemoove_movie_listitem_Info() {
 
-        $opt = get_option('BeMoOve_admin_datas');
-        $account_id = isset($opt['account_id']) ? $opt['account_id']: null;
-        $account_apiprekey = isset($opt['account_apiprekey']) ? $opt['account_apiprekey']: null;
-        $apiClient = new BeHLSApiClient(WP_BeMoOve_SUBDOMAIN, $account_id, $account_apiprekey);
+        $apiClient = new BeHLSApiClient($this->getUserAccountInfo());
         $tagName = $_POST["tag_name"];
 
         $same_name_records = $this->getWPMovieMetaDataAdapter()->getDataByName($tagName);
@@ -755,7 +756,7 @@ class BeMoOve_Admin_Class {
         // 既にデータがあったら更新せずにhtmlを作成して返却
         if ($same_name_record->flag == '0') {
             $bemooveTag = new BeMoOveTag($same_name_record);
-            die($bemooveTag->createListItemInfo(WP_BeMoOve_SUBDOMAIN, $account_id));
+            die($bemooveTag->createListItemInfo($this->getUserAccountInfo()));
         }
 
         $data = $apiClient->getVideo($tagName);
@@ -793,7 +794,7 @@ class BeMoOve_Admin_Class {
         $same_name_record->flag = $set_arr['flag'];
 
         $bemooveTag = new BeMoOveTag($same_name_record);
-        die($bemooveTag->createListItemInfo(WP_BeMoOve_SUBDOMAIN, $account_id));
+        die($bemooveTag->createListItemInfo($this->getUserAccountInfo()));
     }
 
     function cmt_activate($wPMovieMetaDataAdapter) {
