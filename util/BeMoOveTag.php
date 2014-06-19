@@ -109,40 +109,41 @@ class BeMoOveTag {
     /**
      * 貼り付けコードを取得する
      *
-     * @param $domainName ドメイン名
-     * @param $accountId アカウントID
+     * @param $userAccountInfo アカウント情報
      * @param $isIncludePlayer jwplayer.jsを含めるか否か
      * @return 貼り付けコード
      */
-    function getEmbedSrc($domainName, $accountId, $isIncludePlayer) {
+    function getEmbedSrc($userAccountInfo, $isIncludePlayer) {
 
         $result = "";
         if ($isIncludePlayer === true) {
-            $result = "<script type=\"text/javascript\"src=\"https://". WP_BeMoOve_SUBDOMAIN. ".behls-lite.jp/js/jwplayer.js\"></script>
+            $behlsHostName = $userAccountInfo->getBehlsHost();
+            $result = "<script type=\"text/javascript\"src=\"https://{$behlsHostName}/js/jwplayer.js\"></script>
 <script type=\"text/javascript\">jwplayer.key=\"GExaQ71lyaswjxyW6fBfmJnwYHwXQ9VI1SSpWNtsQo4=\";</script>\r";
         }
 
-        $result .= $this->createTagCore($domainName, $accountId);
+        $result .= $this->createTagCore($userAccountInfo);
         return $result;
     }
 
     /**
      * Html表示コピーペースト用の貼り付けコードを取得する
      *
-     * @param $domainName ドメイン名
-     * @param unknown $accountId アカウントID
+     * @param $userAccountInfo アカウント情報
      * @return Html表示コピーペースト用の貼り付けコード
      */
-    function  getSrcForCopyPaste($domainName, $accountId) {
+    function  getSrcForCopyPaste($userAccountInfo) {
 
-        return htmlspecialchars($this->getEmbedSrc($domainName, $accountId, true));
+        return htmlspecialchars($this->getEmbedSrc($userAccountInfo, true));
     }
 
-    private function createTagCore($domainName, $accountId) {
+    private function createTagCore($userAccountInfo) {
 
         $showWidth = (isset($this->overrideWidth) && 0 < $this->overrideWidth) ? $this->overrideWidth : $this->dbData->video_width;
         $showHeight = (isset($this->overrideHeight) && 0 < $this->overrideHeight) ? $this->overrideHeight : $this->dbData->video_height;
         $showThumbnailFile = $this->getDispThumbnailFile();
+        $behlsHostName = $userAccountInfo->getBehlsHost();
+        $accountId = $userAccountInfo->getAccountId();
 
         return "<div id=\"{$this->getName()}\">Loading the player...</div>
 <script type=\"text/javascript\">
@@ -153,7 +154,7 @@ class BeMoOveTag {
     if (ua.match(/iP(hone|ad|od)/i)) var isIOS = true;
     if (!isAndroid && !isIOS) {
         jwplayer({$this->getName()}).setup({
-            file: \"https://{$domainName}.behls-lite.jp/media/video/{$accountId}/{$this->getName()}.m3u8\",
+            file: \"https://{$behlsHostName}/media/video/{$accountId}/{$this->getName()}.m3u8\",
             image: \"{$showThumbnailFile}\",
             width: \"{$showWidth}\",
             height: \"{$showHeight}\"
@@ -162,7 +163,7 @@ class BeMoOveTag {
         document.getElementById(\"{$this->getName()}\").innerHTML
             = \"\"
             + \"<video id=myVideo\"
-            + \" src='https://{$domainName}.behls-lite.jp/media/video/{$accountId}/{$this->getName()}.m3u8' \"
+            + \" src='https://{$behlsHostName}/media/video/{$accountId}/{$this->getName()}.m3u8' \"
             + \" poster='{$showThumbnailFile}' \"
             + \" width='{$showWidth}' height='{$showHeight}' \"
             + \" controls>\"
@@ -174,11 +175,11 @@ class BeMoOveTag {
     /**
      * 動画一覧画面の一動画あたりの表示情報を作成する。
      *
-     * @param $domainName ドメイン名
-     * @param unknown $accountId アカウントID
+     * @param $userAccountInfo アカウント情報
      * @return 動画一覧画面の一動画あたりの表示情報
      */
-    function createListItemInfo($domainName, $accountId) {
+    function createListItemInfo($userAccountInfo) {
+
         return '<div class="movie_listitem_wrap">'
                     . '<table cellpadding="5" cellspacing="1" style="background-color: #bbbbbb;">'
                     . '<tr>'
@@ -197,7 +198,7 @@ class BeMoOveTag {
                     . '<tr>'
                     . '<td style="background-color: #ccc; vertical-align: top;">ソース<br /><span style="font-size: 7px;">※HTMLに直接貼り付ける場合のソースコード</span></td>'
                     . '<td style="background-color: #fff; vertical-align: top;">'
-                    . '<textarea rows="3" class="copy" style="width:100%;">' . $this->getSrcForCopyPaste($domainName, $accountId) . '</textarea></td>'
+                    . '<textarea rows="3" class="copy" style="width:100%;">' . $this->getSrcForCopyPaste($userAccountInfo) . '</textarea></td>'
                     . '</tr>'
                     . '<tr>'
                     . '<td style="background-color: #ccc; vertical-align: top;">ビデオサイズ</td>'
@@ -209,7 +210,7 @@ class BeMoOveTag {
                     . '</tr>'
                     . '<tr>'
                     . '<td colspan="2" style="background-color: #ccc; vertical-align: top; text-align: right;">'
-                    . ($this->isFlagOn() ? '現在変換処理中です。もうしばらくお待ち下さい。' : '')
+                    . ($this->isFlagOn() ? '<span class="text-accent">※現在変換処理中です。もうしばらくお待ち下さい。</span>' : '')
                     . '<input type="button" value="削除" onclick="var res = confirm(\'本当に削除してもよろしいですか？\');if( res == true ) {location.href = \'admin.php?page=BeMoOve_movies_list&m=delete&hash='.$this->getVideoHash().'\'}else{}" />'
                     . '</td>'
                     . '</tr>'

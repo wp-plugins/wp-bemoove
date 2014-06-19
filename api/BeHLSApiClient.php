@@ -1,53 +1,49 @@
 <?php
 class BeHLSApiClient {
 
-    private $subDomainName;
-    private $accountId;
-    private $accountApiPrekey;
+    private $userAccountInfo;
 
-    function __construct($subDomainName, $accountId, $accountApiPrekey){
+    function __construct($userAccountInfo){
 
-        $this->subDomainName = $subDomainName;
-        $this->accountId = $accountId;
-        $this->accountApiPrekey = $accountApiPrekey;
+        $this->userAccountInfo = $userAccountInfo;
     }
 
     function getAccount() {
         $dt = date("YmdHis");
         $accountApikey = $this->getAccountApiKey($dt);
-        $response = file_get_contents("{$this->getApiRootUri()}/account/get/{$this->accountId}/{$accountApikey}/{$dt}");
+        $response = file_get_contents("{$this->getApiRootUri()}/account/get/{$this->userAccountInfo->getAccountId()}/{$accountApikey}/{$dt}");
         return $this->createJsonFromHttpResponse($response);
     }
 
     function listVideo() {
         $dt = date("YmdHis");
         $accountApikey = $this->getAccountApiKey($dt);
-        $response = file_get_contents("{$this->getApiRootUri()}/video/list/{$this->accountId}/{$accountApikey}/{$dt}");
+        $response = file_get_contents("{$this->getApiRootUri()}/video/list/{$this->userAccountInfo->getAccountId()}/{$accountApikey}/{$dt}");
         return $this->createJsonFromHttpResponse($response);
     }
 
     function getVideo($videoHash) {
         $dt = date("YmdHis");
         $accountApikey = $this->getAccountApiKey($dt);
-        $response = file_get_contents("{$this->getApiRootUri()}/video/get/{$this->accountId}/{$accountApikey}/{$dt}/{$videoHash}");
+        $response = file_get_contents("{$this->getApiRootUri()}/video/get/{$this->userAccountInfo->getAccountId()}/{$accountApikey}/{$dt}/{$videoHash}");
         return $this->createJsonFromHttpResponse($response);
     }
 
     function removeVideo($videoHash) {
         $dt = date("YmdHis");
         $accountApikey = $this->getAccountApiKey($dt);
-        $response = file_get_contents("{$this->getApiRootUri()}/video/remove/{$this->accountId}/{$accountApikey}/{$dt}/{$videoHash}");
+        $response = file_get_contents("{$this->getApiRootUri()}/video/remove/{$this->userAccountInfo->getAccountId()}/{$accountApikey}/{$dt}/{$videoHash}");
         return $this->createJsonFromHttpResponse($response);
     }
 
     private function  getApiRootUri() {
 
-        return "http://{$this->subDomainName}.behls-lite.jp";
+        return "https://{$this->userAccountInfo->getBehlsHost()}";
     }
 
     private function getAccountApiKey($dt) {
 
-        return md5($this->accountApiPrekey . $dt);
+        return md5($this->userAccountInfo->getAccountApiprekey() . $dt);
     }
 
     private function createJsonFromHttpResponse($response) {

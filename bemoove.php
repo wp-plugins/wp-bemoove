@@ -13,9 +13,10 @@ define('WP_BeMoOve__PLUGIN_URL', plugin_dir_url(__FILE__));
 define('WP_BeMoOve__PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('WP_BeMoOve_DELETE_LIMIT', 100000);
 define('WP_BeMoOve_ITEMS_LIMIT', 5);
-define('WP_BeMoOve_SUBDOMAIN', 'wordpress');
 
+require_once(WP_BeMoOve__PLUGIN_DIR . 'bemoove-config.php');
 require_once(WP_BeMoOve__PLUGIN_DIR . 'util/BeMoOveTag.php');
+require_once(WP_BeMoOve__PLUGIN_DIR . 'util/UserAccountInfo.php');
 
 if (is_admin()) {
     require_once(WP_BeMoOve__PLUGIN_DIR . 'class.bemoove-admin.php');
@@ -26,11 +27,11 @@ add_filter('the_content', 'BeMoOve_embedcode');
 
 
 function BeMoOve_embedcode($text) {
-    $jwplayer = "<script type=\"text/javascript\"src=\"https://"
-              . WP_BeMoOve_SUBDOMAIN
-              . ".behls-lite.jp/js/jwplayer.js\"></script>
-                <script type=\"text/javascript\">jwplayer.key=\"GExaQ71lyaswjxyW6fBfmJnwYHwXQ9VI1SSpWNtsQo4=\";
-                </script>";
+
+    $userAccountInfo = UserAccountInfo::getInstance();
+
+    $jwplayer = "<script type=\"text/javascript\"src=\"https://" . $userAccountInfo->getBehlsHost() . "/js/jwplayer.js\"></script>
+<script type=\"text/javascript\">jwplayer.key=\"GExaQ71lyaswjxyW6fBfmJnwYHwXQ9VI1SSpWNtsQo4=\";</script>";
 
     $responsive = "<script type='text/javascript'>
 window.onload = function() {
@@ -88,10 +89,9 @@ function BeMoOve_shortcode($matches) {
     $tagName = trim($tag[0], "\"");
     $bemooveTag = BeMoOveTag::createInstance($tagName);
 
-    $opt = get_option('BeMoOve_admin_datas');
-    $accountId = $opt['account_id'];
+    $userAccountInfo = UserAccountInfo::getInstance();
 
-    $bemoove_code = $bemooveTag->getEmbedSrc(WP_BeMoOve_SUBDOMAIN, $accountId, false);
+    $bemoove_code = $bemooveTag->getEmbedSrc($userAccountInfo, false);
 
     return '<div class="movie_wrap">' . $bemoove_code . "</div>";
 }

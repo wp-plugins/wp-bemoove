@@ -10,7 +10,7 @@
 .page a {
     display:block;
     width:18;
-    padding:5px 5px 5px 5px; 
+    padding:5px 5px 5px 5px;
     text-decoration:none;
 
 }
@@ -26,9 +26,14 @@
     float:left;
     margin:2px;
     width:18;
-    padding:5px 5px 5px 5px; 
+    padding:5px 5px 5px 5px;
     border: #bbbbbb 1px solid;
 }
 
+.text-accent {
+    color: red;
+}
+
 .bemoove_title{color: #555;background-color:#eee; font-size: 100%; padding:5px;}
+
 .bemoove_description{color: #888;margin:0px; padding:0px;}
