@@ -687,10 +687,9 @@ class BeMoOve_Admin_Class {
                 $offset = $_GET["s"];
             }
             $get_list = $this->getWPMovieMetaDataAdapter()->getTopDataFromOffset($offset, WP_BeMoOve_ITEMS_LIMIT);
-            $page_area = $this -> get_pagination();
-?>
-            <table><tr><td><?php print($page_area); ?></td></tr></table>
-<?php
+            $page_area = $this->get_pagination();
+            if ($page_area) print("<table><tr><td>{$page_area}</td></tr></table>");
+
             // 動画情報登録処理を行い、その後表示処理を行う。
             $apiClient = new BeHLSApiClient($this->getUserAccountInfo());
 
@@ -732,6 +731,8 @@ class BeMoOve_Admin_Class {
                 $beMoOveTag = new BeMoOveTag($val);
                 print($beMoOveTag->createListItemInfo($this->getUserAccountInfo()));
             }
+
+            if ($page_area) print("<table><tr><td>{$page_area}</td></tr></table>");
 ?>
             </div>
 <?php
@@ -815,6 +816,9 @@ class BeMoOve_Admin_Class {
         $max = $this->getWPMovieMetaDataAdapter()->getCount();
         $start = $_GET['s'];
         $page = $max / $m_hr;
+
+        if ($page <= 1) return "";
+
         $end = $start + $m_hr;
 
         for($m = 0; $m < $page; $m++){
