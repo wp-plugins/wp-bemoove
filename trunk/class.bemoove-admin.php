@@ -104,12 +104,12 @@ class BeMoOve_Admin_Class {
         } elseif ($isRegisterAccount) {
             // アカウント新規作成時
             $accountdata = BeHLSApiClient::addAcount();
-            if ($accountdata && $accountdata[getAccount][item][activate] == 'T') {
+            if ($accountdata && $accountdata[addAccount][item][activate] == 'T') {
                 // アカウント情報が正しい場合
                 $isAccountRegisterCompleted = true;
                 $userAccountInfo = UserAccountInfo::createInstance(
-                    $accountdata[getAccount][item][id]
-                    , $accountdata[getAccount][item][prekey]
+                    $accountdata[addAccount][item][id]
+                    , $accountdata[addAccount][item][prekey]
                 );
                 $userAccountInfo->save();
                 $this->setUserAccountInfo($userAccountInfo);
