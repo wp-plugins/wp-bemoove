@@ -20,14 +20,25 @@ class UserAccountInfo {
         return $this->accountApiprekey;
     }
 
+    /** アカウント設定が完了済か否か */
+    function hasAccount() {
+
+        return (!empty($this->accountId) && !empty($this->accountApiprekey));
+    }
+
     private $behlsHost;
-    function getBehlsHost() {
+    public function getBehlsHost() {
 
         if (isset($this->behlsHost)) return $this->behlsHost;
 
         // 設定ファイルから読み込む
-        $this->behlsHost = (BEHLS_HOST_NAME == '' ? self::DEFAULT_BEHLS_HOST : BEHLS_HOST_NAME);
+        $this->behlsHost = self::getBehlsHostCore();
         return $this->behlsHost;
+    }
+
+    public static function getBehlsHostCore() {
+
+        return (BEHLS_HOST_NAME == '' ? self::DEFAULT_BEHLS_HOST : BEHLS_HOST_NAME);
     }
 
     private function __construct($accountId, $accountApiprekey){
@@ -48,15 +59,24 @@ class UserAccountInfo {
     static function createInstance($accountId, $accountApiprekey) {
 
         $instance = new UserAccountInfo($accountId, $accountApiprekey);
-        $instance->save();
         return $instance;
     }
 
-    private function save() {
+    function save() {
 
         $opt = array();
         $opt[self::ACCOUNT_ID_PARAM_KEY] = $this->accountId;
         $opt[self::ACCOUNT_APIPREKEY_PARAM_KEY] = $this->accountApiprekey;
+        update_option(self::OPTION_KEY, $opt);
+    }
+
+    function remove() {
+        $opt = array();
+        $opt[self::ACCOUNT_ID_PARAM_KEY] = '';
+        $opt[self::ACCOUNT_APIPREKEY_PARAM_KEY] = '';
+        $this->accountId = '';
+        $this->accountApiprekey = '';
+        update_option(self::OPTION_KEY, $opt);
         update_option(self::OPTION_KEY, $opt);
     }
 }
