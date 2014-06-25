@@ -20,7 +20,7 @@ class BeMoOve_Admin_Class {
         $this->userAccountInfo = UserAccountInfo::getInstance();
         return $this->userAccountInfo;
     }
-    private function setUserAccountInfo($userAccountInfo) {
+    private function setUserAccountInfo(UserAccountInfo $userAccountInfo) {
 
         $this->userAccountInfo = $userAccountInfo;
     }
@@ -36,21 +36,27 @@ class BeMoOve_Admin_Class {
         add_action('admin_menu', array($this, 'add_pages'));
         add_action('admin_head', array($this, 'wp_custom_admin_css'), 100);
         add_action('admin_head', array($this, 'includeAdminJs'), 100);
-        add_action('wp_ajax_get_bemoove_movie_listitem_Info', array($this, 'get_bemoove_movie_listitem_Info'));
+        if ($this->getUserAccountInfo()->hasAccount()) {
+            // 動画一覧のajax通信用のアクション登録
+            add_action('wp_ajax_get_bemoove_movie_listitem_Info', array($this, 'get_bemoove_movie_listitem_Info'));
+        }
     }
 
     function add_pages() {
-        add_menu_page('BeMoOve','BeMoOve', 'level_8', 'BeMoOve_movies_list', array($this, 'BeMoOve_Movies_List_Page'), '', NULL);
-        add_submenu_page('BeMoOve_movies_list', '新規追加', '新規追加', 'level_8', 'BeMoOve_new', array($this, 'BeMoOve_Input_Page'));
-        add_submenu_page('BeMoOve_movies_list', 'アカウント設定', 'アカウント設定', 'level_8', 'BeMoOve_setting', array($this, 'BeMoOve_Admin_Page'));
-        add_submenu_page('BeMoOve_movies_list', '使い方', '使い方', 'level_8', 'BeMoOve_help', array($this, 'BeMoOve_Help_Page'));
+
+        if ($this->getUserAccountInfo()->hasAccount()) {
+            add_menu_page('BeMoOve','BeMoOve', 'level_8', 'BeMoOve_movies_list', array($this, 'BeMoOve_Movies_List_Page'), '', NULL);
+            add_submenu_page('BeMoOve_movies_list', '新規追加', '新規追加', 'level_8', 'BeMoOve_new', array($this, 'BeMoOve_Input_Page'));
+            add_submenu_page('BeMoOve_movies_list', 'アカウント設定', 'アカウント設定', 'level_8', 'BeMoOve_setting', array($this, 'BeMoOve_Admin_Page'));
+            add_submenu_page('BeMoOve_movies_list', '使い方', '使い方', 'level_8', 'BeMoOve_help', array($this, 'BeMoOve_Help_Page'));
+        } else {
+            add_menu_page('BeMoOve','BeMoOve', 'level_8', 'BeMoOve_welcome', array($this, 'BeMoOve_Welcome_Page'), '', NULL);
+        }
     }
 
     function wp_custom_admin_css() {
         $url = WP_BeMoOve__PLUGIN_URL . 'css/style.css';
-        echo '<!-- custom admin css -->
-        <link rel = "stylesheet" href = "'.$url.'" type="text/css" media="all" />
-        <!-- /end custom adming css -->';
+        print('<link rel = "stylesheet" href = "'.$url.'" type="text/css" media="all" />');
     }
 
     function includeAdminJs() {
@@ -59,23 +65,178 @@ class BeMoOve_Admin_Class {
             . '<script src="' . $jsRoot . '/admin.js" type="text/javascript"></script>');
     }
 
+    function BeMoOve_Welcome_Page() {
+
+        // アカウント登録か否かを判断する。
+        $isAccountDeleted = $_GET['deleted'] == '1';
+        $isRestartAccount = $_POST['restart_account'] == '1';
+        $errOnRestartAccount = null;
+        $isRegisterAccount = $_POST['register_account'] == '1';
+        $isRestartPage = $isRestartAccount || $_GET['restart'] == '1';
+        $isAccountRegisterCompleted = false;
+
+        if ($isRestartAccount) {
+            // アカウント再利用登録時
+            $accountId = $_POST['account_id'];
+            $accountApiprekey = $_POST['account_apiprekey'];
+
+            if (empty($accountId)) {
+                $errOnRestartAccount .= 'account_idは必須項目です。<br />';
+            }
+            if (empty($accountApiprekey)) {
+                $errOnRestartAccount .= 'account_apiprekeyは必須項目です。<br />';
+            }
+
+            if (empty($errOnRestartAccount)) {
+                $userAccountInfo = UserAccountInfo::createInstance($accountId, $accountApiprekey);
+                $apiClient = new BeHLSApiClient($userAccountInfo);
+                $accountdata = $apiClient->getAccount();
+                if ($accountdata && $accountdata[getAccount][item][activate] == 'T') {
+                    // アカウント情報が正しい場合
+                    $isAccountRegisterCompleted = true;
+                    $userAccountInfo->save();
+                    $this->setUserAccountInfo($userAccountInfo);
+                    $this->syncAccountData();
+                } else {
+                    $errOnRestartAccount .= "入力情報に誤りがあります。<br />";
+                }
+            }
+        } elseif ($isRegisterAccount) {
+            // アカウント新規作成時
+            $accountdata = BeHLSApiClient::addAcount();
+            if ($accountdata && $accountdata[getAccount][item][activate] == 'T') {
+                // アカウント情報が正しい場合
+                $isAccountRegisterCompleted = true;
+                $userAccountInfo = UserAccountInfo::createInstance(
+                    $accountdata[getAccount][item][id]
+                    , $accountdata[getAccount][item][prekey]
+                );
+                $userAccountInfo->save();
+                $this->setUserAccountInfo($userAccountInfo);
+            }
+        }
+
+        if ($isAccountDeleted) {
+            // アカウントが削除された場合
+?>
+<div class="wrap welcome_area">
+    <h2>アカウント設定</h2>
+    <div class="info">
+        アカウントの削除が完了しました。
+    </div>
+    <div class="navi_area">
+        <h4>■別のアカウントを登録してご利用いただく場合はこちら</h4>
+        <div><a href="admin.php?page=BeMoOve_welcome" class="link_btn">新しいアカウントを設定する</a></div>
+    </div>
+</div>
+<?php
+        } elseif ($isAccountRegisterCompleted) {
+            // アカウント登録（再利用含め）が正常に完了した場合
+?>
+<div class="wrap welcome_area">
+    <h2>利用開始準備完了</h2>
+    <div class="info">
+        WP-BemoovePluginのご利用登録が完了しました。
+    </div>
+    <div class="navi_area">
+        <h4>■さっそくWP-BemoovePluginをご利用いただく場合はこちら</h4>
+        <div><a href="admin.php?page=BeMoOve_new" class="link_btn">動画をアップロードする</a></div>
+    </div>
+    <div class="navi_area">
+        <h4>■使い方を確認いただく場合はこちら</h4>
+        <div><a href="admin.php?page=BeMoOve_help" class="link_btn">プラグインの使い方</a></div>
+    </div>
+</div>
+<?php
+        } elseif ($isRestartPage) {
+            // アカウント再利用ページの場合
+?>
+<div class="wrap welcome_area">
+    <h2>利用開始準備<a href="admin.php?page=BeMoOve_welcome" class="add-new-h2">戻る</a></h2>
+    <div class="info">
+        前回WP-BemoovePluginをご利用いただいた際のアカウント情報を入力してください。<br />
+        <?php print(empty($errOnRestartAccount) ? "" : "<span class=\"text-accent\">{$errOnRestartAccount}</span>") ?>
+    </div>
+    <h3>■アカウント情報入力</h3>
+    <form action="" method="post">
+        <table class="form-table">
+            <tr>
+                <th><label for="account_id">account_id</label></th>
+                <td><input name="account_id" type="text" id="account_id" class="regular-text" value="<?php print($_POST['account_id']); ?>" /></td>
+            </tr>
+            <tr>
+                <th><label for="account_apiprekey">account_apiprekey</label></th>
+                <td><input name="account_apiprekey" type="text" id="account_apiprekey" class="regular-text" value="<?php print($_POST['account_apiprekey']); ?>" /></td>
+            </tr>
+        </table>
+        <input type="hidden" name="restart_account" value="1" />
+        <p class="submit"><input type="submit" name="Submit" class="button-primary" value="アカウント情報を登録する" /></p>
+    </form>
+</div>
+<?php
+        } else {
+            // アカウント新規登録ページの場合
+?>
+<div class="wrap welcome_area">
+    <h2>利用開始準備</h2>
+    <div class="info">
+        WP-BemoovePluginをインストールいただき誠にありがとうございます。<br />
+        WP-BemoovePluginは、<a target="blank" href="http://www.bemoove.jp/">ビムーブ株式会社</a>が提供するWordPress上で動画を簡単に配信することができる<br />
+        プラグインです。<br />
+        このプラグインは無料でどなたでもご利用いただけます。<br />
+        ご利用にあたっては以下の利用規約をご確認いただき、利用開始ボタンをクリックしてください。
+    </div>
+    <div style="max-width: 750px;">
+        <div id="privacy_area">
+            <iframe width="750" height="200" src="https://www.bemoove.jp/privacy/service_behlsdev.html" frameborder="0" class="inbox"></iframe>
+        </div>
+        <div class="form_area">
+            <form action="" method="post">
+                <input type="hidden" name="register_account" value="1" />
+                <div>
+                    <input type="submit" name="Submit" class="button-primary" value="WP-BemoovePluginの利用を開始する（無料）" />
+                </div>
+            </form>
+        </div>
+        <div class="restart_area">
+            <a href="admin.php?page=BeMoOve_welcome&restart=1">以前作成したWP-BemoovePluginのアカウント情報を引き継ぐ方はこちら</a>
+        </div>
+    </div>
+</div>
+<?php
+        }
+    }
+
     /**
      * アカウント設定画面の表示を行う。
      */
     function BeMoOve_Admin_Page() {
 
+        if ($_POST['remove_account'] == '1') {
+            $apiClient = new BeHLSApiClient($this->getUserAccountInfo());
+            $userAccountInfo = $apiClient->removeAcount();
+
+            if ($userAccountInfo) {
+                $this->getUserAccountInfo()->remove();
+
+                // 結果ページへリダイレクト
+                $location = admin_url() . '/admin.php?page=BeMoOve_welcome&deleted=1';
+                die("<script type=\"text/javascript\">(function() { location.href = \"{$location}\"; })();</script>");
+            }
+        }
+
+        $isEdit = isset($_POST[UserAccountInfo::OPTION_KEY]);
         $isAccountActivate = false; // アクティブなアカウントか否か
 
         // アカウント設定保存ボタン押下時
-        if (isset($_POST[UserAccountInfo::OPTION_KEY])) {
-            check_admin_referer('BeMoOve_Admin_Page');
+        if ($isEdit) {
+            check_admin_referer('edit_account');
             $opt = $_POST[UserAccountInfo::OPTION_KEY];
             $userAccountInfo = UserAccountInfo::createInstance(
                 $opt[UserAccountInfo::ACCOUNT_ID_PARAM_KEY]
                 , $opt[UserAccountInfo::ACCOUNT_APIPREKEY_PARAM_KEY]
             );
             $this->setUserAccountInfo($userAccountInfo);
-            print('<div class="updated fade"><p style="font-weight: bold;">変更を保存しました。</p></div>');
         }
 
         $accountId = $this->getUserAccountInfo()->getAccountId();
@@ -84,108 +245,39 @@ class BeMoOve_Admin_Class {
             $apiClient = new BeHLSApiClient($this->getUserAccountInfo());
             $accountdata = $apiClient->getAccount();
 
-            $max_strage_capacity = $accountdata[getAccount][item][quota] / 1024 / 1024;
-            $max_strage_capacity = floor($max_strage_capacity * 10);
-            $max_strage_capacity = $max_strage_capacity / 10;
+            $isAccountActivate = $accountdata && $accountdata[getAccount][item][activate] == 'T';
 
-            $dispstrage = $accountdata[getAccount][item][disk_used] / 1024 / 1024;
-            $dispstrage = floor($dispstrage * 10);
-            $dispstrage = $dispstrage / 10;
+            if ($isAccountActivate) {
+                $max_strage_capacity = $accountdata[getAccount][item][quota] / 1024 / 1024;
+                $max_strage_capacity = floor($max_strage_capacity * 10);
+                $max_strage_capacity = $max_strage_capacity / 10;
 
-            $used_rate = (0 < $max_strage_capacity) ? ($dispstrage * 100 / $max_strage_capacity) : 0;
-            $used_rate = floor($used_rate * 100);
-            $used_rate = $used_rate / 100;
+                $dispstrage = $accountdata[getAccount][item][disk_used] / 1024 / 1024;
+                $dispstrage = floor($dispstrage * 10);
+                $dispstrage = $dispstrage / 10;
 
-            $isAccountActivate = $accountdata[getAccount][item][activate] == 'T';
+                $used_rate = (0 < $max_strage_capacity) ? ($dispstrage * 100 / $max_strage_capacity) : 0;
+                $used_rate = floor($used_rate * 100);
+                $used_rate = $used_rate / 100;
+            }
         }
 
-        // 動画の同期処理
-        if ($isAccountActivate && $_POST['sync_movies'] == '1') {
-            $video_list_data = $apiClient->listVideo();
-
-            // 動画が存在しない場合
-            if ($video_list_data[message][code] == '102') {
-                print('<div class="updated fade"><p style="font-weight: bold;">動画ファイルは存在しません。</p></div>');
+        if ($isEdit) {
+            if ($isAccountActivate) {
+                $userAccountInfo->save();
+                $this->syncAccountData();
+                print('<div class="updated fade"><p style="font-weight: bold;">変更を保存しました。</p></div>');
             } else {
-                $video_item_list = $video_list_data[listVideo];
-
-                // APIで取得した動画一覧がWP側のDBにあれば更新、なければ追加を行う。
-                // APIで取得できなかった動画は削除する。
-                // 重複したタグ名がAPIから取得された場合は、先頭に取得してきたもを優先し、後続のものは無視する
-                $wp_movie_records = $this->getWPMovieMetaDataAdapter()->getAllData();
-
-                // APIで取得できなかった動画をWP
-                $wp_delete_target = array();
-                foreach ($wp_movie_records as $record) {
-                    $is_delete_target = true;
-                    foreach ($video_item_list[item] as $vide_item) {
-                        if ($vide_item[video][tag] == $record->name) {
-                            $is_delete_target = false;
-                            break;
-                        }
-                    }
-
-                    if ($is_delete_target) {
-                        array_push($wp_delete_target, $record->name);
-                    }
-                }
-                if (0 < count($wp_delete_target)) {
-                    $this->getWPMovieMetaDataAdapter()->deleteByNames($wp_delete_target);
-                }
-
-                $dealed_movie_names = array();
-                foreach ($video_item_list[item] as $vide_item) {
-
-                    $video_size = explode("x", $vide_item[video][s]);
-
-                    // 数値が取得できなかったら更新しない
-                    // 新規登録直後には##video_s##という文字列で返却される場合がある
-                    if (!is_numeric($video_size[0])) continue;
-
-                    $vide_name = $vide_item[video][tag];
-                    if (in_array($vide_name, $dealed_movie_names)) continue;
-                    array_push($dealed_movie_names, $vide_name);
-
-                    $set_arr = array(
-                        'name' => $vide_item[video][tag]
-                        , 'hash_name' => $vide_item[video][hash]
-                        , 'video_hash' => $vide_item[video][hash]
-                        , 'video_file' => $vide_item[video][file_hash]
-                        , 'video_width' => $video_size[0]
-                        , 'video_height' => $video_size[1]
-                        , 'video_time' => $vide_item[video][duration]
-                        , 'thumbnail_hash' => $vide_item[thumbnail][hash]
-                        , 'thumbnail_file' => $vide_item[thumbnail][file_hash]
-                        , 'callback_date' => date('Y-m-d H:i:s')
-                        , 'redirectSuccess_code' => 300
-                        , 'flag' => '0'
-                    );
-
-                    // すでにWP側のDBにあるかをチェック
-                    $wp_has_target = false;
-                    foreach ($wp_movie_records as $record) {
-                        if ($record->name == $vide_name) {
-                            $wp_has_target = true;
-                            break;
-                        }
-                    }
-
-                    if ($wp_has_target) {
-                        // すでにWP側のDBにある場合
-                        $this->getWPMovieMetaDataAdapter()->update($set_arr, array('name' => $vide_name));
-                    } else {
-                        // WP側のDBにない場合
-                        $this->getWPMovieMetaDataAdapter()->insert($set_arr);
-                    }
-                }
-                print('<div class="updated fade"><p style="font-weight: bold;">このアカウントの動画を同期しました。</p></div>');
+                print('<div class="updated fade"><p style="font-weight: bold;">不正なアカウントです。<br />入力情報を見直してください。</p></div>');
             }
         }
 ?>
-        <div class="wrap">
-        <h2>アカウント設定</h2>
+<div class="wrap account_setting_content">
+    <h2>アカウント設定</h2>
+    <div class="account_setting_detail">
+        <h3>■アカウント情報</h3>
         <form action="" method="post">
-            <?php wp_nonce_field('BeMoOve_Admin_Page'); ?>
+            <?php wp_nonce_field('edit_account'); ?>
             <table class="form-table">
                 <tr>
                     <th><label for="inputtext3">account_id</label></th>
@@ -193,7 +285,6 @@ class BeMoOve_Admin_Class {
                                type="text" id="inputtext3" class="regular-text"
                                value="<?php print($this->getUserAccountInfo()->getAccountId()) ?>" /></td>
                 </tr>
-
                 <tr>
                     <th><label for="inputtext4">account_apiprekey</label></th>
                     <td><input name="<?php print(UserAccountInfo::OPTION_KEY . '[' . UserAccountInfo::ACCOUNT_APIPREKEY_PARAM_KEY . ']') ?>"
@@ -206,23 +297,115 @@ class BeMoOve_Admin_Class {
             }
 ?>
             </table>
-            <p class="submit"><input type="submit" name="Submit" class="button-primary" value="変更を保存" /></p>
+            <p class="submit">
+                <input type="submit" name="Submit" class="button-primary" value="アカウント情報を変更する" />
+            </p>
         </form>
-
-<?php
-        if ($isAccountActivate === true) {
-?>
-        <br />
-        <h2>動画の同期</h2>
-        <form action="" method="post">
-            <input type="hidden" name="sync_movies" value="1" />
-            <p class="submit"><input type="submit" name="Submit" class="button-primary" value="アカウントの動画を同期" /></p>
-        </form>
+        <div class="info">
+            ※別途取得したWP-BemoovePluginのアカウントを利用したい場合は、そのアカウント情報を設定<br />
+            することで、そのアカウント利用環境を復元できます。
         </div>
+    </div>
+    <div class="account_setting_detail">
+        <h3>■アカウント削除</h3>
+        <form action="" method="post">
+            <?php wp_nonce_field('remove_account'); ?>
+            <input type="hidden" name="remove_account" value="1" />
+            <p class="submit">
+                <input type="submit" name="Submit" class="button-primary" value="アカウント情報を削除する"
+                       onclick="return confirm('アカウントを削除します。よろしいですか？');" />
+            </p>
+        </form>
+        <div class="info">
+            ※一度削除したアカウント情報は復元できませんのでご注意ください。
+        </div>
+    </div>
+</div>
 <?php
+    }
+
+    private function syncAccountData() {
+        $apiClient = new BeHLSApiClient($this->getUserAccountInfo());
+        $video_list_data = $apiClient->listVideo();
+
+        // 動画が存在しない場合
+        if ($video_list_data[message][code] == '102') {
+            return 0;
         }
-?>
-<?php
+
+        $video_item_list = $video_list_data[listVideo];
+
+        // APIで取得した動画一覧がWP側のDBにあれば更新、なければ追加を行う。
+        // APIで取得できなかった動画は削除する。
+        // 重複したタグ名がAPIから取得された場合は、先頭に取得してきたもを優先し、後続のものは無視する
+        $wp_movie_records = $this->getWPMovieMetaDataAdapter()->getAllData();
+
+        // APIで取得できなかった動画をWPから削除
+        $wp_delete_target = array();
+        foreach ($wp_movie_records as $record) {
+            $is_delete_target = true;
+            foreach ($video_item_list[item] as $vide_item) {
+                if ($vide_item[video][tag] == $record->name) {
+                    $is_delete_target = false;
+                    break;
+                }
+            }
+
+            if ($is_delete_target) {
+                array_push($wp_delete_target, $record->name);
+            }
+        }
+        if (0 < count($wp_delete_target)) {
+            $this->getWPMovieMetaDataAdapter()->deleteByNames($wp_delete_target);
+        }
+
+        $dealed_movie_names = array();
+        foreach ($video_item_list[item] as $vide_item) {
+
+            $video_size = explode("x", $vide_item[video][s]);
+
+            // 数値が取得できなかったら更新しない
+            // 新規登録直後には##video_s##という文字列で返却される場合がある
+            if (!is_numeric($video_size[0])) continue;
+
+            $vide_name = $vide_item[video][tag];
+            if (in_array($vide_name, $dealed_movie_names)) continue;
+            array_push($dealed_movie_names, $vide_name);
+
+            $set_arr = array(
+                'name' => $vide_item[video][tag]
+                , 'hash_name' => $vide_item[video][hash]
+                , 'video_hash' => $vide_item[video][hash]
+                , 'video_file' => $vide_item[video][file_hash]
+                , 'video_width' => $video_size[0]
+                , 'video_height' => $video_size[1]
+                , 'video_time' => $vide_item[video][duration]
+                , 'thumbnail_hash' => $vide_item[thumbnail][hash]
+                , 'thumbnail_file' => $vide_item[thumbnail][file_hash]
+                , 'callback_date' => date('Y-m-d H:i:s')
+                , 'redirectSuccess_code' => 300
+                , 'flag' => '0'
+            );
+
+            // すでにWP側のDBにあるかをチェック
+            $wp_has_target = false;
+            foreach ($wp_movie_records as $record) {
+                if ($record->name == $vide_name) {
+                    $wp_has_target = true;
+                    break;
+                }
+            }
+
+            if ($wp_has_target) {
+                // すでにWP側のDBにある場合
+                $this->getWPMovieMetaDataAdapter()->update($set_arr, array('name' => $vide_name));
+            } else {
+                // WP側のDBにない場合
+                $this->getWPMovieMetaDataAdapter()->insert($set_arr);
+            }
+        }
+
+        return count($dealed_movie_names);
     }
 
     /**
@@ -798,7 +981,7 @@ class BeMoOve_Admin_Class {
         die($bemooveTag->createListItemInfo($this->getUserAccountInfo()));
     }
 
-    function cmt_activate($wPMovieMetaDataAdapter) {
+    function cmt_activate(WPMovieMetaDataAdapter $wPMovieMetaDataAdapter) {
         $cmt_db_version = '1.00';
         $installed_ver = get_option('cmt_meta_version');
         // テーブルのバージョンが違ったら作成
