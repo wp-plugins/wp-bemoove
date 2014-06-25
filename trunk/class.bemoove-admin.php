@@ -844,53 +844,54 @@ class BeMoOve_Admin_Class {
     function BeMoOve_Help_Page() {
 ?>
             <div class="wrap">
-            <h2>○ブログに動画を貼り付けるまで</h2>
+            <h2>使い方</h2>
             <div class="help_content">
-            <ul>
-            <li>
-    １、<a href="http://dev.behls.jp/" target="_blank">＜登録用URL＞</a>からwordpress用のアカウントを登録して、account_idとaccount_apiprekeyを入手<br />
-    ※最短1時間～お時間を頂くことが御座います。<br />
-    ※容量1GBまで無料です。
-            </li>
-            <li>
-    ２、wordpressの管理画面からプラグインに『WP-BeMoOvePlugin』を登録し、有効化する<br />
-    ※wordpressのメニューに『BeMoOve』の項目が追加されます。
-            </li>
-            <li>
-    ３、『アカウント設定画面』を開き、<br />
-    『account_id』と『account_apiprekey』を入力し、『変更を保存』ボタンを押す
-            </li>
-            <li>
-    ４、『新規追加』を押し、動画名を登録<br />
-    ※同一の動画名の動画が複数ある場合、最新の動画が反映されます。
-            </li>
-            <li>
-    ５、各種オプションを指定して動画をアップロード<br />
-    ※縦横のサイズ比率は元々の動画と同じにしてください。<br />
-             <li>
-    ６、動画一覧(BeMoOveをクリック)から貼り付け用タグをコピーして記事に貼り付け<br />
-    ※貼り付け時に縦横サイズの比率を指定することもできます。<br />
-    例）[<?php print(BeMoOveTag::WP_BeMoOve_TAG_ATTR_NAME) ?>="sample"]の場合<br />
-    [<?php print(BeMoOveTag::WP_BeMoOve_TAG_ATTR_NAME) ?>="sample(320, 240)"]と記述することで、<br />320×240のサイズで表示することができます。<br />
-    ※動画詳細画面よりサムネイル画像を変更することも可能です。<br />
-    サムネイル画像のURLを指定することで、その画像をサムネイルとしてご使用いただけます。<br />
-    メディアファイルのアップロード等をご活用ください。
-            </li>
-            </ul>
-            </div>
-
-            <h2>○動画の削除について</h2>
-            <div class="help_content">
-            『動画一覧』画面にて、削除したい動画の右下の『削除』ボタンを押してください。
-            </div>
-
-
-            <h2>○変換が終わらない</h2>
-            <div class="help_content">
-              容量の大きいファイルなどアップロードされますと、
-              時間がかかる場合が御座います。
-              しばらくお待ちください。
-            </div>
+                <div class="help_detail">
+                    <h3>■動画のアップロード</h3>
+                    <ul>
+                        <li>(1)&nbsp;WordPress管理画面左メニューの「新規追加」項目をクリック</li>
+                        <li>(2)&nbsp;動画名を入力（半角英数80文字まで）して「次へ」をクリック</li>
+                        <li>(3)&nbsp;アップロードファイルを「参照」し、各種項目を設定し「アップロード」ボタンをクリック</li>
+                        <li>(4)&nbsp;WordPress管理画面左メニューの「動画一覧」項目にて動画がアップロードされていることを確認</li>
+                    </ul>
+                </div>
+                <div class="help_detail">
+                    <h3>■動画の公開（WordPress投稿内の利用）</h3>
+                    <ul>
+                        <li>(1)&nbsp;WordPress管理画面左メニューの「動画一覧」項目をクリック</li>
+                        <li>(2)&nbsp;公開したい動画の「貼り付け用タグ」項目にあるタグをコピー（例：[<?php print(BeMoOveTag::WP_BeMoOve_TAG_ATTR_NAME) ?>="Test"]）</li>
+                        <li>(3)&nbsp;記事投稿時の入力フォーム内の任意の位置に(2)のコードをペースト</li>
+                        <li>(4)&nbsp;記事公開画面にて動画が表示されていることを確認</li>
+                    </ul>
+                </div>
+                <div class="help_detail">
+                    <h3>■動画の公開（WordPress投稿外の利用）</h3>
+                    <ul>
+                        <li>(1)&nbsp;WordPress管理画面左メニューの「動画一覧」項目をクリック</li>
+                        <li>(2)&nbsp;公開したい動画の「ソース」項目にあるタグをコピー（&lt;scriptで始まっている文字列）</li>
+                        <li>(3)&nbsp;公開したいHTMLファイルの任意の位置に(2)のコードをペースト</li>
+                        <li>(4)&nbsp;公開したいWebページにて動画が表示されていることを確認</li>
+                    </ul>
+                </div>
+                <div class="help_detail">
+                    <h3>■アカウントの移設</h3>
+                    <p>別ドメインのWordPressに現在のアカウントでアップロードした動画などを移設することができます。</p>
+                    <ul>
+                        <li>(1)&nbsp;WordPress管理画面左メニューの「アカウント設定」項目をクリック</li>
+                        <li>(2)&nbsp;「account_id」と「account_apiprekey」の文字列を別途保存しておく</li>
+                        <li>(3)&nbsp;移設先のWordPressに「WP-BemoovePlugin」をインストールし有効化する</li>
+                        <li>(4)&nbsp;利用開始準備画面にて「アカウントを持っている利用者」向けのリンクをクリック</li>
+                        <li>(5)&nbsp;別途保存していた「account_id」と「account_apiprekey」を登録</li>
+                    </ul>
+                </div>
+                <div class="help_detail">
+                    <h3>■ストレージ容量の追加</h3>
+                    <p>ストレージ1GB制限を10GBにアップグレードすることが可能です。<br />詳しくは公式サイトをご覧いただくか、ビムーブ株式会社までお問い合わせください。</p>
+                    <ul>
+                        <li><a target="_blank" href="http://www.bemoove.jp/lp/wpplugin/">ビムーブ公式サイト「WP-BemoovePlugin」紹介ページはこちら</a></li>
+                        <li><a target="_blank" href="https://www.bemoove.jp/contact/">ビムーブへのお問い合わせはこちら</a></li>
+                    </ul>
+                </div>
             </div>
 <?php
     }
