@@ -7,6 +7,7 @@
     border: #bbbbbb 1px solid;
     background-color:#fff;
 }
+
 .page a {
     display:block;
     width:18;
@@ -34,6 +35,28 @@
     color: red;
 }
 
-.bemoove_title{color: #555;background-color:#eee; font-size: 100%; padding:5px;}
+.bemoove_title {
+    color: #555;
+    background-color: #eee;
+    font-size: 100%;
+    padding:5px;
+}
 
-.bemoove_description{color: #888;margin:0px; padding:0px;}
+.bemoove_description {
+    color: #888;
+    margin:0px;
+    padding:0px;
+}
+
+/* style for help page */
+.help_content {
+    margin-left: 8px;
+}
+
+.help_content h3 {
+    font-weight: bold;
+}
+
+.help_detail {
+    margin-bottom: 30px;
+}
