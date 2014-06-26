@@ -1013,7 +1013,7 @@ class BeMoOve_Admin_Class {
     }
 
     function cmt_activate(WPMovieMetaDataAdapter $wPMovieMetaDataAdapter) {
-        $cmt_db_version = '1.00';
+        $cmt_db_version = '1.10';
         $installed_ver = get_option('cmt_meta_version');
         // テーブルのバージョンが違ったら作成
         if ($installed_ver != $cmt_db_version) {
