@@ -113,6 +113,7 @@ class BeMoOve_Admin_Class {
                 );
                 $userAccountInfo->save();
                 $this->setUserAccountInfo($userAccountInfo);
+                $this->syncAccountData();
             }
         }
 
@@ -358,6 +359,7 @@ class BeMoOve_Admin_Class {
 
         // 動画が存在しない場合
         if ($video_list_data[message][code] == '102') {
+            $this->getWPMovieMetaDataAdapter()->deleteAll();
             return 0;
         }
 

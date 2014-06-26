@@ -88,6 +88,12 @@ class WPMovieMetaDataAdapter {
         $wpdb->show_errors();
     }
 
+    function deleteAll() {
+
+        $wpdb = $this->getWbdb();
+        $wpdb->query($wpdb->prepare("DELETE FROM $this->table_name", 0));
+    }
+
     function deleteByName($name) {
 
         $wpdb = $this->getWbdb();
