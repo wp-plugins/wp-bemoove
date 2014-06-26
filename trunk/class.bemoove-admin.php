@@ -81,10 +81,10 @@ class BeMoOve_Admin_Class {
             $accountApiprekey = $_POST['account_apiprekey'];
 
             if (empty($accountId)) {
-                $errOnRestartAccount .= 'account_idは必須項目です。<br />';
+                $errOnRestartAccount .= 'account_idは必須入力項目です。<br />';
             }
             if (empty($accountApiprekey)) {
-                $errOnRestartAccount .= 'account_apiprekeyは必須項目です。<br />';
+                $errOnRestartAccount .= 'account_apiprekeyは必須入力項目です。<br />';
             }
 
             if (empty($errOnRestartAccount)) {
@@ -225,57 +225,84 @@ class BeMoOve_Admin_Class {
             }
         }
 
-        $isEdit = isset($_POST[UserAccountInfo::OPTION_KEY]);
+        $isEdited = false; // アカウントの変更を行ったか否か
         $isAccountActivate = false; // アクティブなアカウントか否か
+        $editErrMsg = '';
+        $editInfoMsg = '';
+        $accountdata = null;
 
         // アカウント設定保存ボタン押下時
-        if ($isEdit) {
+        if ($_POST['edit_account'] == '1') {
             check_admin_referer('edit_account');
             $opt = $_POST[UserAccountInfo::OPTION_KEY];
-            $userAccountInfo = UserAccountInfo::createInstance(
-                $opt[UserAccountInfo::ACCOUNT_ID_PARAM_KEY]
-                , $opt[UserAccountInfo::ACCOUNT_APIPREKEY_PARAM_KEY]
-            );
-            $this->setUserAccountInfo($userAccountInfo);
-        }
+            $newAccountId = $opt[UserAccountInfo::ACCOUNT_ID_PARAM_KEY];
+            $newAccountApiprekey = $opt[UserAccountInfo::ACCOUNT_APIPREKEY_PARAM_KEY];
 
-        $accountId = $this->getUserAccountInfo()->getAccountId();
-        $accountApipreKey = $this->getUserAccountInfo()->getAccountApiprekey();
-        if (!empty($accountId) && !empty($accountApipreKey)) {
+            if (empty($newAccountId)) {
+                $editErrMsg .= 'account_idは必須入力項目です。<br />';
+            }
+            if (empty($newAccountApiprekey)) {
+                $editErrMsg .= 'account_apiprekeyは必須入力項目です。<br />';
+            }
+
+            if (empty($editErrMsg)) {
+                $oldAccountId = $this->getUserAccountInfo()->getAccountId();
+                $oldAccountApiprekey = $this->getUserAccountInfo()->getAccountApiprekey();
+                if ($newAccountId == $oldAccountId && $newAccountApiprekey == $oldAccountApiprekey) {
+                    $editErrMsg .= 'アカウント情報に変更がありません。<br />';
+                }
+
+                if (empty($editErrMsg)) {
+                    $userAccountInfo = UserAccountInfo::createInstance(
+                        $newAccountId
+                        , $newAccountApiprekey
+                    );
+                    $this->setUserAccountInfo($userAccountInfo);
+                    $isEdited = true;
+                }
+                $apiClient = new BeHLSApiClient($this->getUserAccountInfo());
+                $accountdata = $apiClient->getAccount();
+                $isAccountActivate = $accountdata && $accountdata[getAccount][item][activate] == 'T';
+
+                if ($isEdited) {
+                    if ($isAccountActivate) {
+                        $userAccountInfo->save();
+                        $this->syncAccountData();
+                        $editInfoMsg .= 'アカウント情報を変更しました。<br />';
+                        $editInfoMsg .= 'このアカウントの動画データが自動的に同期されました。<br />';
+                    } else {
+                        $editErrMsg .= '入力されたアカウント情報が正しくありません。<br />';
+                    }
+                }
+            }
+        } else {
             $apiClient = new BeHLSApiClient($this->getUserAccountInfo());
             $accountdata = $apiClient->getAccount();
-
             $isAccountActivate = $accountdata && $accountdata[getAccount][item][activate] == 'T';
-
-            if ($isAccountActivate) {
-                $max_strage_capacity = $accountdata[getAccount][item][quota] / 1024 / 1024;
-                $max_strage_capacity = floor($max_strage_capacity * 10);
-                $max_strage_capacity = $max_strage_capacity / 10;
-
-                $dispstrage = $accountdata[getAccount][item][disk_used] / 1024 / 1024;
-                $dispstrage = floor($dispstrage * 10);
-                $dispstrage = $dispstrage / 10;
-
-                $used_rate = (0 < $max_strage_capacity) ? ($dispstrage * 100 / $max_strage_capacity) : 0;
-                $used_rate = floor($used_rate * 100);
-                $used_rate = $used_rate / 100;
-            }
         }
 
-        if ($isEdit) {
-            if ($isAccountActivate) {
-                $userAccountInfo->save();
-                $this->syncAccountData();
-                print('<div class="updated fade"><p style="font-weight: bold;">変更を保存しました。</p></div>');
-            } else {
-                print('<div class="updated fade"><p style="font-weight: bold;">不正なアカウントです。<br />入力情報を見直してください。</p></div>');
-            }
+
+        if ($isAccountActivate) {
+            $max_strage_capacity = $accountdata[getAccount][item][quota] / 1024 / 1024;
+            $max_strage_capacity = floor($max_strage_capacity * 10);
+            $max_strage_capacity = $max_strage_capacity / 10;
+
+            $dispstrage = $accountdata[getAccount][item][disk_used] / 1024 / 1024;
+            $dispstrage = floor($dispstrage * 10);
+            $dispstrage = $dispstrage / 10;
+
+            $used_rate = (0 < $max_strage_capacity) ? ($dispstrage * 100 / $max_strage_capacity) : 0;
+            $used_rate = floor($used_rate * 100);
+            $used_rate = $used_rate / 100;
         }
+
 ?>
 <div class="wrap account_setting_content">
     <h2>アカウント設定</h2>
     <div class="account_setting_detail">
         <h3>■アカウント情報</h3>
+        <?php print(empty($editErrMsg) ? "" : "<div><span class=\"text-accent\">{$editErrMsg}</span></div>") ?>
+        <?php print(empty($editInfoMsg) ? "" : "<div><span>{$editInfoMsg}</span></div>") ?>
         <form action="" method="post">
             <?php wp_nonce_field('edit_account'); ?>
             <table class="form-table">
@@ -297,6 +324,7 @@ class BeMoOve_Admin_Class {
             }
 ?>
             </table>
+            <input type="hidden" name="edit_account" value="1" />
             <p class="submit">
                 <input type="submit" name="Submit" class="button-primary" value="アカウント情報を変更する" />
             </p>
