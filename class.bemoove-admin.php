@@ -125,8 +125,8 @@ class BeMoOve_Admin_Class {
         アカウントの削除が完了しました。
     </div>
     <div class="navi_area">
-        <h4>■別のアカウントを登録してご利用いただく場合はこちら</h4>
-        <div><a href="admin.php?page=BeMoOve_welcome" class="link_btn">新しいアカウントを設定する</a></div>
+        <h4>■新しくアカウントを登録してご利用いただく場合はこちら</h4>
+        <div><a href="admin.php?page=BeMoOve_welcome" class="link_btn">新しくアカウントを登録する</a></div>
     </div>
 </div>
 <?php
@@ -188,7 +188,7 @@ class BeMoOve_Admin_Class {
     </div>
     <div style="max-width: 750px;">
         <div id="privacy_area">
-            <iframe width="750" height="200" src="https://www.bemoove.jp/privacy/service_behlsdev.html" frameborder="0" class="inbox"></iframe>
+            <iframe width="750" height="200" src="https://www.bemoove.jp/privacy/service_behlsdev.html" seamless="seamless" class="inbox"></iframe>
         </div>
         <div class="form_area">
             <form action="" method="post">
@@ -216,11 +216,11 @@ class BeMoOve_Admin_Class {
             $apiClient = new BeHLSApiClient($this->getUserAccountInfo());
             $userAccountInfo = $apiClient->removeAcount();
 
-            if ($userAccountInfo) {
+            if ($userAccountInfo && $userAccountInfo[removeAccount][item][activate] == 'T') {
                 $this->getUserAccountInfo()->remove();
 
                 // 結果ページへリダイレクト
-                $location = admin_url() . '/admin.php?page=BeMoOve_welcome&deleted=1';
+                $location = admin_url() . 'admin.php?page=BeMoOve_welcome&deleted=1';
                 die("<script type=\"text/javascript\">(function() { location.href = \"{$location}\"; })();</script>");
             }
         }
@@ -1026,7 +1026,7 @@ class BeMoOve_Admin_Class {
      */
     function BeMoOve_Help_Page() {
 ?>
-            <div class="wrap">
+        <div class="wrap">
             <h2>使い方</h2>
             <div class="help_content">
                 <div class="help_detail">
@@ -1076,6 +1076,7 @@ class BeMoOve_Admin_Class {
                     </ul>
                 </div>
             </div>
+        </div>
 <?php
     }
 
