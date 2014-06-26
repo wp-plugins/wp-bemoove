@@ -5,7 +5,7 @@ define('BEHLS_HOST_NAME', 'wordpress.behls-lite.jp');
 define('BEHLS_PROTOCOL', 'https');
 
 /** アカウント操作を行う代理サーバーのホスト名 */
-define('BEHLS_ADMIN_PROXY_HOST_NAME', 'todo');
+define('BEHLS_ADMIN_PROXY_HOST_NAME', 'dev.behls.jp/wp-bemoove');
 
 /**
  * admin_apikey
