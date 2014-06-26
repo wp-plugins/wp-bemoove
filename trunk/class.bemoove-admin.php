@@ -219,6 +219,7 @@ class BeMoOve_Admin_Class {
 
             if ($userAccountInfo && $userAccountInfo[removeAccount][item][activate] == 'T') {
                 $this->getUserAccountInfo()->remove();
+                $this->getWPMovieMetaDataAdapter()->deleteAll();
 
                 // 結果ページへリダイレクト
                 $location = admin_url() . 'admin.php?page=BeMoOve_welcome&deleted=1';
