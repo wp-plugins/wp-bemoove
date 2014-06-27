@@ -35,12 +35,16 @@ class BeMoOveTag {
      * ※変更後のURLはユーザ（管理者）入力値であるため、XSSに注意しhtmlエスケープを行ったものを表示する。
      * @return string サムネイル表示用のファイルパス
      */
-    function getDispThumbnailFile() {
+    function getDispThumbnailFile(UserAccountInfo $userAccountInfo) {
 
         $result
              = $this->isThumbnailFileOverridden()
                 ? htmlspecialchars($this->getOverrideThumbnailFile())
-                : $this->getThumbnailFile();
+                : str_replace(
+                      $userAccountInfo->getBehlsHost()
+                      , $userAccountInfo->getDeliveryBehlsHost()
+                      , $this->getThumbnailFile()
+                  );
 
         return $result;
     }
@@ -113,11 +117,11 @@ class BeMoOveTag {
      * @param $isIncludePlayer jwplayer.jsを含めるか否か
      * @return 貼り付けコード
      */
-    function getEmbedSrc($userAccountInfo, $isIncludePlayer) {
+    function getEmbedSrc(UserAccountInfo $userAccountInfo, $isIncludePlayer) {
 
         $result = "";
         if ($isIncludePlayer === true) {
-            $behlsHostName = $userAccountInfo->getBehlsHost();
+            $behlsHostName = $userAccountInfo->getDeliveryBehlsHost();
             $result = "<script type=\"text/javascript\"src=\"https://{$behlsHostName}/js/jwplayer.js\"></script>
 <script type=\"text/javascript\">jwplayer.key=\"GExaQ71lyaswjxyW6fBfmJnwYHwXQ9VI1SSpWNtsQo4=\";</script>\r";
         }
@@ -137,12 +141,12 @@ class BeMoOveTag {
         return htmlspecialchars($this->getEmbedSrc($userAccountInfo, true));
     }
 
-    private function createTagCore($userAccountInfo) {
+    private function createTagCore(UserAccountInfo $userAccountInfo) {
 
         $showWidth = (isset($this->overrideWidth) && 0 < $this->overrideWidth) ? $this->overrideWidth : $this->dbData->video_width;
         $showHeight = (isset($this->overrideHeight) && 0 < $this->overrideHeight) ? $this->overrideHeight : $this->dbData->video_height;
-        $showThumbnailFile = $this->getDispThumbnailFile();
-        $behlsHostName = $userAccountInfo->getBehlsHost();
+        $showThumbnailFile = $this->getDispThumbnailFile($userAccountInfo);
+        $behlsHostName = $userAccountInfo->getDeliveryBehlsHost();
         $accountId = $userAccountInfo->getAccountId();
 
         return "<div id=\"{$this->getName()}\">Loading the player...</div>
@@ -178,7 +182,7 @@ class BeMoOveTag {
      * @param $userAccountInfo アカウント情報
      * @return 動画一覧画面の一動画あたりの表示情報
      */
-    function createListItemInfo($userAccountInfo) {
+    function createListItemInfo(UserAccountInfo $userAccountInfo) {
 
         return '<div class="movie_listitem_wrap">'
                     . '<table cellpadding="5" cellspacing="1" style="background-color: #bbbbbb;">'
@@ -187,7 +191,7 @@ class BeMoOveTag {
                     . ($this->isFlagOn()
                           ? ('<img src="'.WP_BeMoOve__PLUGIN_URL.'/images/noimage.jpg" width="120">')
                           : ('<a href="admin.php?page=BeMoOve_movies_list&m=details&hash=' . $this->getVideoHash() . '"">'
-                             . '<img src="' . $this->getDispThumbnailFile() . '" width="120">'
+                             . '<img src="' . $this->getDispThumbnailFile($userAccountInfo) . '" width="120">'
                              . '</a>'))
                     . '</td>'
                     . '<td style="background-color: #ccc; width: 110px; vertical-align: top;">貼り付け用タグ</td>'

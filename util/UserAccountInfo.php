@@ -41,6 +41,21 @@ class UserAccountInfo {
         return (BEHLS_HOST_NAME == '' ? self::DEFAULT_BEHLS_HOST : BEHLS_HOST_NAME);
     }
 
+    private $deliveryBehlsHost;
+    public function getDeliveryBehlsHost() {
+
+        if (isset($this->deliveryBehlsHost)) return $this->deliveryBehlsHost;
+
+        // 設定ファイルから読み込む
+        $this->deliveryBehlsHost = self::getDeliveryBehlsHostCore();
+        return $this->deliveryBehlsHost;
+    }
+
+    public static function getDeliveryBehlsHostCore() {
+
+        return (BEHLS_DELIVERY_HOST_NAME == '' ? getBehlsHostCore() : BEHLS_DELIVERY_HOST_NAME);
+    }
+
     private function __construct($accountId, $accountApiprekey){
 
         $this->accountId = $accountId;
