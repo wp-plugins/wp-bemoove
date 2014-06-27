@@ -30,7 +30,7 @@ function BeMoOve_embedcode($text) {
 
     $userAccountInfo = UserAccountInfo::getInstance();
 
-    $jwplayer = "<script type=\"text/javascript\"src=\"https://" . $userAccountInfo->getBehlsHost() . "/js/jwplayer.js\"></script>
+    $jwplayer = "<script type=\"text/javascript\"src=\"https://" . $userAccountInfo->getDeliveryBehlsHost() . "/js/jwplayer.js\"></script>
 <script type=\"text/javascript\">jwplayer.key=\"GExaQ71lyaswjxyW6fBfmJnwYHwXQ9VI1SSpWNtsQo4=\";</script>";
 
     $responsive = "<script type='text/javascript'>
