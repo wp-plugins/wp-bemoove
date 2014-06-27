@@ -10,6 +10,16 @@ class BeMoOveTag {
 
     private $overrideHeight;
 
+    private function getId() {
+
+        return $this->dbData->movie_id;
+    }
+
+    private function getTagId() {
+
+        return $this->getName() . '_' . rand(0, 999);
+    }
+
     function getName() {
 
         return $this->dbData->name;
@@ -143,13 +153,14 @@ class BeMoOveTag {
 
     private function createTagCore(UserAccountInfo $userAccountInfo) {
 
+        $tagId = $this->getTagId();
         $showWidth = (isset($this->overrideWidth) && 0 < $this->overrideWidth) ? $this->overrideWidth : $this->dbData->video_width;
         $showHeight = (isset($this->overrideHeight) && 0 < $this->overrideHeight) ? $this->overrideHeight : $this->dbData->video_height;
         $showThumbnailFile = $this->getDispThumbnailFile($userAccountInfo);
         $behlsHostName = $userAccountInfo->getDeliveryBehlsHost();
         $accountId = $userAccountInfo->getAccountId();
 
-        return "<div id=\"{$this->getName()}\">Loading the player...</div>
+        return "<div id=\"{$tagId}\">Loading the player...</div>
 <script type=\"text/javascript\">
     var isAndroid = false;
     var isIOS = false;
@@ -157,14 +168,14 @@ class BeMoOveTag {
     if (ua.match(/Android/i)) var isAndroid = true;
     if (ua.match(/iP(hone|ad|od)/i)) var isIOS = true;
     if (!isAndroid && !isIOS) {
-        jwplayer({$this->getName()}).setup({
+        jwplayer({$tagId}).setup({
             file: \"https://{$behlsHostName}/media/video/{$accountId}/{$this->getName()}.m3u8\",
             image: \"{$showThumbnailFile}\",
             width: \"{$showWidth}\",
             height: \"{$showHeight}\"
         });
     } else {
-        document.getElementById(\"{$this->getName()}\").innerHTML
+        document.getElementById(\"{$tagId}\").innerHTML
             = \"\"
             + \"<video id=myVideo\"
             + \" src='https://{$behlsHostName}/media/video/{$accountId}/{$this->getName()}.m3u8' \"
