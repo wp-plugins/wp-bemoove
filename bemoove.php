@@ -45,21 +45,23 @@ window.onload = function() {
             m_style_width.replace('px', '');
             var m_width = parseInt(m_style_width, 10) * 1.5;
             if (initWidth < m_width) initWidth = m_width;
-            /*
+            /* 右クリックでソースを表示する・現状コメントアウト
             mw.onmousedown = function(e) {
                 if (e.which != 3) return;
                 var copy_data = this.getElementsByClassName('copy')[0].value;
                 var copyTxt = document.createElement('textarea');
                 copyTxt.value = copy_data;
                 this.getElementsByClassName('copy_area')[0].appendChild(copyTxt);
-                copyTxt.select();
+                copyTxt.onclick = function() { this.select(); };
+                copyTxt.onmouseout = function() {
+                    copyTxt.onclick = null;
+                    copyTxt.onmouseout = null;
+                    var copy_area = this.parentNode;
+                    for (var i = 0; i < copy_area.childNodes.length; i++) {
+                        copy_area.removeChild(copy_area.childNodes[i]);
+                    }
+                };
             };
-            mw.onmouseleave = function(e) {
-                var copy_area = this.getElementsByClassName('copy_area')[0];
-                for (var i = 0; i < copy_area.childNodes.length; i++) {
-                    copy_area.removeChild(copy_area.childNodes[i]);
-                }
-            }
             //*/
         }
 
