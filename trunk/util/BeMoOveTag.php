@@ -136,7 +136,7 @@ class BeMoOveTag {
 <script type=\"text/javascript\">jwplayer.key=\"GExaQ71lyaswjxyW6fBfmJnwYHwXQ9VI1SSpWNtsQo4=\";</script>\r";
         }
 
-        $result .= $this->createTagCore($userAccountInfo);
+        $result .= $this->createTagCore($userAccountInfo, !$isIncludePlayer);
         return $result;
     }
 
@@ -151,9 +151,9 @@ class BeMoOveTag {
         return htmlspecialchars($this->getEmbedSrc($userAccountInfo, true));
     }
 
-    private function createTagCore(UserAccountInfo $userAccountInfo) {
+    private function createTagCore(UserAccountInfo $userAccountInfo, $isIdRandom = true) {
 
-        $tagId = $this->getTagId();
+        $tagId = $isIdRandom ? $this->getTagId() : $this->getName();
         $showWidth = (isset($this->overrideWidth) && 0 < $this->overrideWidth) ? $this->overrideWidth : $this->dbData->video_width;
         $showHeight = (isset($this->overrideHeight) && 0 < $this->overrideHeight) ? $this->overrideHeight : $this->dbData->video_height;
         $showThumbnailFile = $this->getDispThumbnailFile($userAccountInfo);
@@ -168,7 +168,7 @@ class BeMoOveTag {
     if (ua.match(/Android/i)) var isAndroid = true;
     if (ua.match(/iP(hone|ad|od)/i)) var isIOS = true;
     if (!isAndroid && !isIOS) {
-        jwplayer({$tagId}).setup({
+        jwplayer(\"{$tagId}\").setup({
             file: \"https://{$behlsHostName}/media/video/{$accountId}/{$this->getName()}.m3u8\",
             image: \"{$showThumbnailFile}\",
             width: \"{$showWidth}\",
