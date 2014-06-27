@@ -21,17 +21,17 @@ require_once(WP_BeMoOve__PLUGIN_DIR . 'util/UserAccountInfo.php');
 if (is_admin()) {
     require_once(WP_BeMoOve__PLUGIN_DIR . 'class.bemoove-admin.php');
     new BeMoOve_Admin_Class;
+} else {
+    add_filter('wp_head', 'beMoOveHeader');
 }
 
-add_filter('the_content', 'BeMoOve_embedcode');
-
-
-function BeMoOve_embedcode($text) {
-
+function beMoOveHeader() {
+    $result = '';
     $userAccountInfo = UserAccountInfo::getInstance();
 
     $jwplayer = "<script type=\"text/javascript\"src=\"https://" . $userAccountInfo->getDeliveryBehlsHost() . "/js/jwplayer.js\"></script>
 <script type=\"text/javascript\">jwplayer.key=\"GExaQ71lyaswjxyW6fBfmJnwYHwXQ9VI1SSpWNtsQo4=\";</script>";
+    $result .= $jwplayer;
 
     $responsive = "<script type='text/javascript'>
 window.onload = function() {
@@ -45,7 +45,22 @@ window.onload = function() {
             m_style_width.replace('px', '');
             var m_width = parseInt(m_style_width, 10) * 1.5;
             if (initWidth < m_width) initWidth = m_width;
-            console.log(initWidth);
+            /*
+            mw.onmousedown = function(e) {
+                if (e.which != 3) return;
+                var copy_data = this.getElementsByClassName('copy')[0].value;
+                var copyTxt = document.createElement('textarea');
+                copyTxt.value = copy_data;
+                this.getElementsByClassName('copy_area')[0].appendChild(copyTxt);
+                copyTxt.select();
+            };
+            mw.onmouseleave = function(e) {
+                var copy_area = this.getElementsByClassName('copy_area')[0];
+                for (var i = 0; i < copy_area.childNodes.length; i++) {
+                    copy_area.removeChild(copy_area.childNodes[i]);
+                }
+            }
+            //*/
         }
 
         var resize = function() {
@@ -76,10 +91,17 @@ window.onload = function() {
     }
 };
 </script>";
+    $result .= $responsive;
+    print($result);
+}
 
-    $movies = preg_replace_callback('/\[' . BeMoOveTag::WP_BeMoOve_TAG_ATTR_NAME . '=\".+\"\]/', BeMoOve_shortcode, $text);
+add_filter('the_content', 'BeMoOve_embedcode');
 
-    return $jwplayer . $responsive . $movies;
+
+
+function BeMoOve_embedcode($text) {
+
+    return preg_replace_callback('/\[' . BeMoOveTag::WP_BeMoOve_TAG_ATTR_NAME . '=\".+\"\]/', BeMoOve_shortcode, $text);
 }
 
 function BeMoOve_shortcode($matches) {
@@ -91,7 +113,12 @@ function BeMoOve_shortcode($matches) {
 
     $userAccountInfo = UserAccountInfo::getInstance();
 
-    $bemoove_code = $bemooveTag->getEmbedSrc($userAccountInfo, false);
+    $bemooveCode = $bemooveTag->getEmbedSrc($userAccountInfo, false);
+    $bemooveCodeForCopy = $bemooveTag->getEmbedSrc($userAccountInfo, true);
 
-    return '<div class="movie_wrap">' . $bemoove_code . "</div>";
+    return '<div class="movie_wrap">'
+           . $bemooveCode
+           . '<input type="hidden" class="copy" value="' . htmlspecialchars($bemooveCodeForCopy)  . '" />'
+           . '<div class="copy_area"></div>'
+           . "</div>";
 }
