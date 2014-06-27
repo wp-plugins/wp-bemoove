@@ -865,7 +865,7 @@ class BeMoOve_Admin_Class {
                     <tr><td style="background-color: #ccc; width: 90px;">created_at</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['created_at'].'</td></tr>
                     <tr><td colspan="2" style="background-color: #ccc;">THUMBNAIL</td></tr>
                     <tr><td style="background-color: #ccc; width: 90px;">file_path</td><td style="background-color: #fff; width: 300px;">'
-                      . ($beMoOveTag->isThumbnailFileOverridden() ? $beMoOveTag->getDispThumbnailFile() :$data['getVideo']['item']['thumbnail']['file_path']) . '</td></tr>
+                      . ($beMoOveTag->isThumbnailFileOverridden() ? $beMoOveTag->getDispThumbnailFile($this->getUserAccountInfo()) :$data['getVideo']['item']['thumbnail']['file_path']) . '</td></tr>
                     <tr><td style="background-color: #ccc; width: 90px;"></td><td style="background-color: #fff; width: 300px; text-align: right;">'
                       . ($beMoOveTag->isThumbnailFileOverridden() ? '<a id="link_thumbnail_default" href="admin.php?page=BeMoOve_movies_list&m=details&hash='. $hash_name .'&otf=default">サムネイルを元に戻す</a>&nbsp;&nbsp;&nbsp;&nbsp;' : '')
                       . '<a id="link_thumbnail_edit" href="admin.php?page=BeMoOve_movies_list&m=details&hash='. $hash_name .'&otf=">サムネイルを変更する</a></td></tr>
