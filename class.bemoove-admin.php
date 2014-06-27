@@ -45,7 +45,7 @@ class BeMoOve_Admin_Class {
     function add_pages() {
 
         if ($this->getUserAccountInfo()->hasAccount()) {
-            add_menu_page('BeMoOve','動画一覧', 'level_8', 'BeMoOve_movies_list', array($this, 'BeMoOve_Movies_List_Page'), '', NULL);
+            add_menu_page('BeMoOve','BeMoOve', 'level_8', 'BeMoOve_movies_list', array($this, 'BeMoOve_Movies_List_Page'), '', NULL);
             add_submenu_page('BeMoOve_movies_list', '新規追加', '新規追加', 'level_8', 'BeMoOve_new', array($this, 'BeMoOve_Input_Page'));
             add_submenu_page('BeMoOve_movies_list', 'アカウント設定', 'アカウント設定', 'level_8', 'BeMoOve_setting', array($this, 'BeMoOve_Admin_Page'));
             add_submenu_page('BeMoOve_movies_list', '使い方', '使い方', 'level_8', 'BeMoOve_help', array($this, 'BeMoOve_Help_Page'));
