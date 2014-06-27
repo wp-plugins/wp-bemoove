@@ -27,6 +27,21 @@ if (is_admin()) {
 
 function beMoOveHeader() {
     $result = '';
+
+    $css = "<style type='text/css'>
+.copy_txt_wrap {
+  position: relative;
+  top: -35px;
+  left: 50px;
+  z-index: 9999;
+  padding: 0.3em 0.5em;
+  color: #FFFFFF;
+  background: #c72439;
+  border-radius: 0.5em;
+}
+</style>";
+    $result .= $css;
+
     $userAccountInfo = UserAccountInfo::getInstance();
 
     $jwplayer = "<script type=\"text/javascript\"src=\"https://" . $userAccountInfo->getDeliveryBehlsHost() . "/js/jwplayer.js\"></script>
@@ -45,17 +60,21 @@ window.onload = function() {
             m_style_width.replace('px', '');
             var m_width = parseInt(m_style_width, 10) * 1.5;
             if (initWidth < m_width) initWidth = m_width;
-            /* 右クリックでソースを表示する・現状コメントアウト
+            /* 右クリックでソースを表示する・現状コメントアウト*/
             mw.onmousedown = function(e) {
                 if (e.which != 3) return;
+                if (0 < this.getElementsByClassName('copy_txt_wrap').length) return;
                 var copy_data = this.getElementsByClassName('copy')[0].value;
+                var copyTxtWrap = document.createElement('div');
+                copyTxtWrap.className = 'copy_txt_wrap';
+                this.getElementsByClassName('copy_area')[0].appendChild(copyTxtWrap);
                 var copyTxt = document.createElement('textarea');
                 copyTxt.value = copy_data;
-                this.getElementsByClassName('copy_area')[0].appendChild(copyTxt);
+                copyTxtWrap.appendChild(copyTxt);
                 copyTxt.onclick = function() { this.select(); };
-                copyTxt.onmouseout = function() {
+                copyTxtWrap.onmouseout = function() {
                     copyTxt.onclick = null;
-                    copyTxt.onmouseout = null;
+                    copyTxtWrap.onmouseout = null;
                     var copy_area = this.parentNode;
                     for (var i = 0; i < copy_area.childNodes.length; i++) {
                         copy_area.removeChild(copy_area.childNodes[i]);
