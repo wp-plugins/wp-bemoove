@@ -183,7 +183,7 @@ class BeMoOveTag {
             + \" width='{$showWidth}' height='{$showHeight}' \"
             + \" controls>\"
             + \" </video>\";
-        }
+    }
 </script>";
     }
 
