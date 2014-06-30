@@ -60,7 +60,7 @@ window.onload = function() {
             m_style_width.replace('px', '');
             var m_width = parseInt(m_style_width, 10) * 1.5;
             if (initWidth < m_width) initWidth = m_width;
-            /* 右クリックでソースを表示する・現状コメントアウト*/
+            /* 右クリックでソースを表示する・現状コメントアウト
             mw.onmousedown = function(e) {
                 if (e.which != 3) return;
                 if (0 < this.getElementsByClassName('copy_txt_wrap').length) return;
