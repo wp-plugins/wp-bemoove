@@ -40,14 +40,15 @@ $(function() {
     // 変換中の動画があったらAjax通信でポーリングしつつ情報を取得・設定する
     var movie_listitem_wrap = $('div.movie_listitem_wrap');
     if (movie_listitem_wrap && 0 < movie_listitem_wrap.length) {
+
+        // input要素にクリック時にテキストを全選択できるように修正
+        $(document).on('click', 'div.movie_listitem_wrap .copy', function(){
+            $(this).select();
+        });
+
         movie_listitem_wrap.each(function() {
             // すでに取得済みの場合はスキップ
             var wrap = $(this);
-
-            // input要素にクリック時にテキストを全選択できるように修正
-            wrap.find('.copy').on('click', function(){
-                $(this).select();
-            })
 
             if (wrap.find('input.flag').val() != 1) return;
 
