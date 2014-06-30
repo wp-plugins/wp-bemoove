@@ -132,7 +132,7 @@ class BeMoOveTag {
         $result = "";
         if ($isIncludePlayer === true) {
             $behlsHostName = $userAccountInfo->getDeliveryBehlsHost();
-            $result = "<script type=\"text/javascript\"src=\"https://{$behlsHostName}/js/jwplayer.js\"></script>
+            $result = "<script type=\"text/javascript\"src=\"http://{$behlsHostName}/js/jwplayer.js\"></script>
 <script type=\"text/javascript\">jwplayer.key=\"GExaQ71lyaswjxyW6fBfmJnwYHwXQ9VI1SSpWNtsQo4=\";</script>\r";
         }
 
