@@ -3,7 +3,7 @@ Contributors: ビムーブ株式会社 (BeMoOve Co.,Ltd)
 Tags: BeMoOve,bemoove,Japanese,Video,Movie
 Requires at least: 3.9-RC1
 Tested up to: 3.9.1
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 
 WP-BeMoOvePlugin ～Wordpressで動画を投稿、管理、再生するプラグイン～
 
