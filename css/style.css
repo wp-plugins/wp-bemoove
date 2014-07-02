@@ -54,6 +54,23 @@ a.link_btn:hover, a.link_btn:active {
     color: red;
 }
 
+.fade_msg_box {
+    color: #fff;
+    background-color: #000;
+    opacity: .8;
+    width: 50%;
+    padding: 10px 15px;
+    position: absolute;
+    top: 100px;
+    left: 50px;
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
+    max-width: 600px;
+    -webkit-transition: 1s;
+    transition: 1s;
+    z-index: 999;
+}
+
 .bemoove_title {
     color: #555;
     background-color: #eee;
