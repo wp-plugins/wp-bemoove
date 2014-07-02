@@ -133,6 +133,12 @@ class BeMoOve_Admin_Class {
 <?php
         } elseif ($isAccountRegisterCompleted) {
             // アカウント登録（再利用含め）が正常に完了した場合
+            if ($isRestartAccount) {
+                // 結果ページへリダイレクト
+                $fade_msg = 'アカウントの設定が完了しました。';
+                $location = admin_url() . 'admin.php?page=BeMoOve_movies_list&restart_account=1';
+                die("<script type=\"text/javascript\">(function() { location.href = \"{$location}\"; })();</script>");
+            }
 ?>
 <div class="wrap welcome_area">
     <h2>利用開始準備完了</h2>
@@ -896,6 +902,10 @@ class BeMoOve_Admin_Class {
             <div class="wrap">
             <h2>動画一覧 <a href="admin.php?page=BeMoOve_new" class="add-new-h2">新規追加</a></h2>
 <?php
+            if ($_GET['restart_account'] == '1') {
+                print('<div class="fade_msg_box">アカウント設定を行いました。<br />アカウントの同期が完了しました。</div>');
+            }
+
             $offset = 0;
             if (is_numeric($_GET["s"])) {
                 $offset = $_GET["s"];

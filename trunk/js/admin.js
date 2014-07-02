@@ -1,5 +1,11 @@
 $(function() {
 
+    // メッセージ
+    var fade_msg_box = $('.fade_msg_box');
+    if (fade_msg_box && 0 < fade_msg_box.length) {
+        setTimeout(function() { fade_msg_box.css({ opacity:"0", "z-index":"0" }); }, 1500)
+    }
+
     // アップロード画面
     // 画像の品質を決める簡単オプション選択時の処理
     var file_upload_spec_list = $('#file_upload_spec_list');
