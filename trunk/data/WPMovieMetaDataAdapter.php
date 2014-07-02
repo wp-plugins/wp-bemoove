@@ -38,6 +38,15 @@ class WPMovieMetaDataAdapter {
         ) CHARACTER SET 'utf8';";
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql);
+
+        // カラム追加分
+        $wpdb = $this->getWbdb();
+        $sql = "DESCRIBE {$this->table_name} social_share_flag;";
+        $ret = $wpdb->query($sql);
+        if (empty($ret)) {
+            $sql = "ALTER TABLE {$this->table_name} ADD social_share_flag int(1) NOT NULL DEFAULT '1';";
+            $wpdb->query($sql);
+        }
     }
 
     function  getCount() {

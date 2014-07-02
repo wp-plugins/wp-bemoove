@@ -761,7 +761,8 @@ class BeMoOve_Admin_Class {
                 'name' => $name
                 , 'hash_name' => $hash_name
                 , 'redirectSuccess_code' => 300
-                , 'flag' => '1'
+                , 'social_share_flag' => 1
+                , 'flag' => 1
             );
 
             // 同名のタグがすでにあれば削除した後に追加
@@ -820,65 +821,116 @@ class BeMoOve_Admin_Class {
      */
     function BeMoOve_Movies_List_Page() {
         // 詳細画面の場合
-        if ($_GET['m'] == 'details') {
+        $isEdit = $_GET['m'] == 'edit' || $_POST['edit'] == '1';
+        if ($isEdit) {
+            $video_hash = $_GET['hash'];
+            if (empty($video_hash)) $video_hash = $_POST['hash'];
+            $editMsg = '';
+
+            if ($_POST['edit'] == '1') {
+                // 保存ボタン押下時
+                // サムネ画像の編集
+                $thumbnail_file_path = $_POST['thumbnail_file_path'];
+                if (empty($thumbnail_file_path) || $thumbnail_file_path == 'default') {
+                    $set_arr = array('override_thumbnail_file' => null);
+                } else {
+                    $set_arr = array('override_thumbnail_file' => $thumbnail_file_path);
+                }
+
+                // ソーシャル連携の編集
+                $social = $_POST['social'] == '1';
+                $set_arr += array('social_share_flag' => $social ? 1 : 0);
+                $this->getWPMovieMetaDataAdapter()->update($set_arr, array('video_hash' => $video_hash));
+
+                $editMsg .= '設定を保存しました。';
+            }
+?>
+    <div class="wrap">
+        <h2>動画編集&nbsp;
+            <a href="admin.php?page=BeMoOve_movies_list&m=details&hash=<?php print($video_hash) ?>" class="add-new-h2">戻る</a>&nbsp;
+            <a href="admin.php?page=BeMoOve_movies_list" class="add-new-h2">動画一覧へ</a>
+        </h2>
+
+<?php
+            print(empty($editMsg) ? "" : "<div class='fade_msg_box'>$editMsg</div>");
+            $targetVideoHashRecords = $this->getWPMovieMetaDataAdapter()->getDataByVideoHash($video_hash);
+            $beMoOveTag = new BeMoOveTag($targetVideoHashRecords[0]);
+            print($beMoOveTag->getEmbedSrc($this->getUserAccountInfo(), true));
+?>
+        <br />
+        <form action="" method="post">
+            <table class="edit">
+                <tr>
+                    <th class="short"><label for="thumbnail_file_path">Thumbnail File Path</label></th>
+                    <td class="short"><input type="text" id="thumbnail_file_path" name="thumbnail_file_path" style="width: 100%;"
+                        value="<?php print($beMoOveTag->getDispThumbnailFile($this->getUserAccountInfo())) ?>" /></td>
+                </tr>
+                <tr>
+                    <th class="short">ソーシャル連携</th>
+                    <td class="short">
+                        <input id="social_on" type="radio" name="social" value="1" <?php print($beMoOveTag->isSocialShare() ? 'checked="checked"' : '') ?> />
+                        <label for="social_on">ON</label>
+                        <input id="social_off" type="radio" name="social" value="0" <?php print($beMoOveTag->isSocialShare() ? '' : 'checked="checked"') ?> />
+                        <label for="social_off">OFF</label>
+                    </td>
+                </tr>
+            </table>
+            <input type="hidden" name="edit" value="1" />
+            <input type="hidden" name="hash" value="<?php print($video_hash) ?>" />
+            <p class="submit">
+                <input type="submit" name="Submit" class="button-primary" value="設定を保存する" />
+            </p>
+        </form>
+        <div class="info">
+            ※サムネイルファイルは、ファイルのURLを指定してください。<br />
+            ※サムネイルファイルは、入力を空にして保存することで、アップロード時のものに戻すことができます。<br />
+            ※ソーシャル連携をONにすることで、閲覧ページにて動画にソーシャル連携用のオーバーレイが表示されます。<br />
+        </div>
+    </div>
+<?php
+        } elseif ($_GET['m'] == 'details') {
             $apiClient = new BeHLSApiClient($this->getUserAccountInfo());
-            $hash_name = $_GET['hash'];
+            $video_hash = $_GET['hash'];
             $override_thumbnail_file = $_GET['otf'];
 ?>
-            <div class="wrap">
-            <h2>動画詳細 <a href="admin.php?page=BeMoOve_movies_list" class="add-new-h2">戻る</a></h2>
+    <div class="wrap">
+        <h2>動画詳細 <a href="admin.php?page=BeMoOve_movies_list" class="add-new-h2">戻る</a></h2>
 <?php
-            if ($override_thumbnail_file) {
-                // サムネファイルのURL編集の場合
-                if ($override_thumbnail_file == 'default') {
-                    $set_arr = array('override_thumbnail_file' => null);
-                    $this->getWPMovieMetaDataAdapter()->update($set_arr, array('video_hash' => $hash_name));
-                    print("サムネイルファイルをご登録時のものに戻しました。");
-                } else {
-                    $set_arr = array('override_thumbnail_file' => $override_thumbnail_file);
-                    $this->getWPMovieMetaDataAdapter()->update($set_arr, array('video_hash' => $hash_name));
-                    print("サムネイルファイルを変更しました。");
-                }
-            }
-
-            $targetVideoHashRecords = $this->getWPMovieMetaDataAdapter()->getDataByVideoHash($hash_name);
+            $targetVideoHashRecords = $this->getWPMovieMetaDataAdapter()->getDataByVideoHash($video_hash);
             $beMoOveTag = new BeMoOveTag($targetVideoHashRecords[0]);
             print($beMoOveTag->getEmbedSrc($this->getUserAccountInfo(), true));
             print("<br />");
 
-            $data = $apiClient->getVideo($hash_name);
+            $data = $apiClient->getVideo($video_hash);
 
             print('
-                <table cellpadding="5" cellspacing="1" style="background-color: #bbbbbb;">
-                    <tr><td colspan="2" style="background-color: #ccc;">VIDEO</td></tr>
-                    <tr><td style="background-color: #ccc; width: 90px;">tag</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['tag'].'</td></tr>
-                    <tr><td style="background-color: #ccc; width: 90px;">hash</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['hash'].'</td></tr>
-                    <tr><td style="background-color: #ccc; width: 90px;">file_tag</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['file_tag'].'</td></tr>
-                    <tr><td style="background-color: #ccc; width: 90px;">file_hash</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['file_hash'].'</td></tr>
-                    <tr><td style="background-color: #ccc; width: 90px;">file_path</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['file_path'].'</td></tr>
-                    <tr><td style="background-color: #ccc; width: 90px;">size</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['size'].'</td></tr>
-                    <tr><td style="background-color: #ccc; width: 90px;">duration</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['duration'].'</td></tr>
-                    <tr><td style="background-color: #ccc; width: 90px;">convert_time</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['convert_time'].'</td></tr>
-                    <tr><td style="background-color: #ccc; width: 90px;">s</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['s'].'</td></tr>
-                    <tr><td style="background-color: #ccc; width: 90px;">aspect</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['aspect'].'</td></tr>
-                    <tr><td style="background-color: #ccc; width: 90px;">r</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['r'].'</td></tr>
-                    <tr><td style="background-color: #ccc; width: 90px;">b</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['b'].'</td></tr>
-                    <tr><td style="background-color: #ccc; width: 90px;">ar</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['ar'].'</td></tr>
-                    <tr><td style="background-color: #ccc; width: 90px;">ab</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['ab'].'</td></tr>
-                    <tr><td style="background-color: #ccc; width: 90px;">ac</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['ac'].'</td></tr>
-                    <tr><td style="background-color: #ccc; width: 90px;">profile</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['profile'].'</td></tr>
-                    <tr><td style="background-color: #ccc; width: 90px;">level</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['level'].'</td></tr>
-                    <tr><td style="background-color: #ccc; width: 90px;">created_at</td><td style="background-color: #fff; width: 300px;">'.$data['getVideo']['item']['video']['created_at'].'</td></tr>
-                    <tr><td colspan="2" style="background-color: #ccc;">THUMBNAIL</td></tr>
-                    <tr><td style="background-color: #ccc; width: 90px;">file_path</td><td style="background-color: #fff; width: 300px;">'
-                      . ($beMoOveTag->isThumbnailFileOverridden() ? $beMoOveTag->getDispThumbnailFile($this->getUserAccountInfo()) :$data['getVideo']['item']['thumbnail']['file_path']) . '</td></tr>
-                    <tr><td style="background-color: #ccc; width: 90px;"></td><td style="background-color: #fff; width: 300px; text-align: right;">'
-                      . ($beMoOveTag->isThumbnailFileOverridden() ? '<a id="link_thumbnail_default" href="admin.php?page=BeMoOve_movies_list&m=details&hash='. $hash_name .'&otf=default">サムネイルを元に戻す</a>&nbsp;&nbsp;&nbsp;&nbsp;' : '')
-                      . '<a id="link_thumbnail_edit" href="admin.php?page=BeMoOve_movies_list&m=details&hash='. $hash_name .'&otf=">サムネイルを変更する</a></td></tr>
+                <table class="detail">
+                    <tr><th colspan="2">VIDEO</th></tr>
+                    <tr><th class="short">tag</th><td class="short">'.$data[getVideo][item][video][tag].'</td></tr>
+                    <tr><th class="short">hash</th><td class="short">'.$data[getVideo][item][video][hash].'</td></tr>
+                    <tr><th class="short">file_tag</th><td class="short">'.$data[getVideo][item][video][file_tag].'</td></tr>
+                    <tr><th class="short">file_hash</th><td class="short">'.$data[getVideo][item][video][file_hash].'</td></tr>
+                    <tr><th class="short">file_path</th><td class="short">'.$data[getVideo][item][video][file_path].'</td></tr>
+                    <tr><th class="short">size</th><td class="short">'.$data[getVideo][item][video][size].'</td></tr>
+                    <tr><th class="short">duration</th><td class="short">'.$data[getVideo][item][video][duration].'</td></tr>
+                    <tr><th class="short">convert_time</th><td class="short">'.$data[getVideo][item][video][convert_time].'</td></tr>
+                    <tr><th class="short">s</th><td class="short">'.$data[getVideo][item][video][s].'</td></tr>
+                    <tr><th class="short">aspect</th><td class="short">'.$data[getVideo][item][video][aspect].'</td></tr>
+                    <tr><th class="short">r</th><td class="short">'.$data[getVideo][item][video][r].'</td></tr>
+                    <tr><th class="short">b</th><td class="short">'.$data[getVideo][item][video][b].'</td></tr>
+                    <tr><th class="short">ar</th><td class="short">'.$data[getVideo][item][video][ar].'</td></tr>
+                    <tr><th class="short">ab</th><td class="short">'.$data[getVideo][item][video][ab].'</td></tr>
+                    <tr><th class="short">ac</th><td class="short">'.$data[getVideo][item][video][ac].'</td></tr>
+                    <tr><th class="short">profile</th><td class="short">'.$data[getVideo][item][video][profile].'</td></tr>
+                    <tr><th class="short">level</th><td class="short">'.$data[getVideo][item][video][level].'</td></tr>
+                    <tr><th class="short">created_at</th><td class="short">'.$data[getVideo][item][video][created_at].'</td></tr>
+                    <tr><th colspan="2">THUMBNAIL</th></tr>
+                    <tr><th class="short">file_path</th><td class="short">'.$beMoOveTag->getDispThumbnailFile($this->getUserAccountInfo()).'</td></tr>
                 </table>
             ');
 ?>
-            </div>
+        <div style="margin-top: 20px;"><a href="admin.php?page=BeMoOve_movies_list&m=edit&hash=<?php print($video_hash) ?>" class="link_btn">設定を変更する</a></div>
+    </div>
 <?php
         // 削除画面の場合
         } elseif ($_GET['m'] == 'delete') {
@@ -943,7 +995,7 @@ class BeMoOve_Admin_Class {
                         , 'thumbnail_hash' => $data[getVideo][item][thumbnail][hash]
                         , 'thumbnail_file' => $data[getVideo][item][thumbnail][file_hash]
                         , 'callback_date' => date('Y-m-d H:i:s')
-                        , 'flag' => '0'
+                        , 'flag' => 0
                     );
 
                     $this->getWPMovieMetaDataAdapter()->update($set_arr, array('name' => $val->name));
@@ -1023,7 +1075,7 @@ class BeMoOve_Admin_Class {
     }
 
     function cmt_activate(WPMovieMetaDataAdapter $wPMovieMetaDataAdapter) {
-        $cmt_db_version = '1.10';
+        $cmt_db_version = '1.2.0';
         $installed_ver = get_option('cmt_meta_version');
         // テーブルのバージョンが違ったら作成
         if ($installed_ver != $cmt_db_version) {
