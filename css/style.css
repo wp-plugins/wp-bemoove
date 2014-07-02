@@ -55,8 +55,8 @@ a.link_btn:hover, a.link_btn:active {
 }
 
 .fade_msg_box {
-    color: #fff;
-    background-color: #000;
+    color: #000;
+    background-color: #fff;
     opacity: .8;
     width: 50%;
     padding: 10px 15px;
@@ -109,6 +109,61 @@ a.link_btn:hover, a.link_btn:active {
 .welcome_area .navi_area {
     margin: 10px 0 40px 10px;
 }
+
+/* style for movie detail page */
+table.detail {
+    background-color: #bbbbbb;
+    border-spacing: 1px;
+}
+
+table.detail th, table.detail td {
+    padding: 5px;
+}
+
+table.detail th {
+    text-align: left;
+    background-color: #ccc;
+}
+
+table.detail th.short {
+    width: 90px;
+}
+
+table.detail td {
+    background-color: #fff;
+}
+
+table.detail td.short {
+    width: 300px;
+}
+
+/* style for movie edit page */
+table.edit {
+    background-color: #bbbbbb;
+    border-spacing: 1px;
+}
+
+table.edit th, table.edit td {
+    padding: 5px;
+}
+
+table.edit th {
+    text-align: left;
+    background-color: #ccc;
+}
+
+table.edit th.short {
+    width: 180px;
+}
+
+table.edit td {
+    background-color: #fff;
+}
+
+table.edit td.short {
+    width: 400px;
+}
+
 
 /* style for setting page */
 .account_setting_content .account_setting_detail {

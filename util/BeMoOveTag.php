@@ -84,6 +84,11 @@ class BeMoOveTag {
         return $this->dbData->video_time;
     }
 
+    function isSocialShare() {
+
+        return $this->dbData->social_share_flag == 1;
+    }
+
     function __construct($dbData){
 
         $this->dbData = $dbData;
@@ -159,6 +164,7 @@ class BeMoOveTag {
         $showThumbnailFile = $this->getDispThumbnailFile($userAccountInfo);
         $behlsHostName = $userAccountInfo->getDeliveryBehlsHost();
         $accountId = $userAccountInfo->getAccountId();
+        $isSocial = $this->isSocialShare();
 
         return "<div id=\"{$tagId}\">Loading the player...</div>
 <script type=\"text/javascript\">
@@ -172,7 +178,8 @@ class BeMoOveTag {
             file: \"https://{$behlsHostName}/media/video/{$accountId}/{$this->getName()}.m3u8\",
             image: \"{$showThumbnailFile}\",
             width: \"{$showWidth}\",
-            height: \"{$showHeight}\"
+            height: \"{$showHeight}\",
+            " . ($isSocial ? "sharing: {}," : "") . "
         });
     } else {
         document.getElementById(\"{$tagId}\").innerHTML

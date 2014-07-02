@@ -77,20 +77,5 @@ $(function() {
             get_movie_listitem_with_ajax();
         });
     }
-
-    // 詳細画面
-    // サムネイル画像URLの編集
-    var link_thumbnail_edit = $('#link_thumbnail_edit');
-    if (link_thumbnail_edit && 0 < link_thumbnail_edit.length) {
-        link_thumbnail_edit.on('click', function() {
-            var url = prompt('変更したいサムネイルのURLを入力してください');
-            if (!url) return false;
-
-            var dt = new Date();
-
-            this.href = this.href + encodeURIComponent(url) + '&dummy=' + dt.getTime();
-            return true;
-        });
-    }
 });
 
