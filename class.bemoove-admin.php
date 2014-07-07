@@ -284,6 +284,13 @@ class BeMoOve_Admin_Class {
                 }
             }
         } else {
+
+            if ($_POST['sync_account'] == '1') {
+                // アカウント同期ボタン押下時
+                $this->syncAccountData();
+                $editInfoMsg .= 'このアカウントの動画データを同期しました。<br />';
+            }
+
             $apiClient = new BeHLSApiClient($this->getUserAccountInfo());
             $accountdata = $apiClient->getAccount();
             $isAccountActivate = $accountdata && $accountdata[getAccount][item][activate] == 'T';
@@ -307,10 +314,10 @@ class BeMoOve_Admin_Class {
 ?>
 <div class="wrap account_setting_content">
     <h2>アカウント設定</h2>
+    <?php print(empty($editInfoMsg) ? "" : "<div class=\"fade_msg_box\" style=\"color:#fff!important;background-color:#000!important;\"><span>{$editInfoMsg}</span></div>") ?>
     <div class="account_setting_detail">
         <h3>■アカウント情報</h3>
         <?php print(empty($editErrMsg) ? "" : "<div><span class=\"text-accent\">{$editErrMsg}</span></div>") ?>
-        <?php print(empty($editInfoMsg) ? "" : "<div><span>{$editInfoMsg}</span></div>") ?>
         <form action="" method="post">
             <?php wp_nonce_field('edit_account'); ?>
             <table class="form-table">
@@ -339,7 +346,19 @@ class BeMoOve_Admin_Class {
         </form>
         <div class="info">
             ※別途取得したWP-BemoovePluginのアカウントを利用したい場合は、そのアカウント情報を設定<br />
-            することで、そのアカウント利用環境を復元できます。
+            することで、そのアカウント利用環境を復元できます。<br />
+        </div>
+    </div>
+    <div class="account_setting_detail">
+        <h3>■アカウント同期</h3>
+        <form action="" method="post">
+            <input type="hidden" name="sync_account" value="1" />
+            <p class="submit">
+                <input type="submit" name="Submit" class="button-primary" value="アカウント情報を同期する" />
+            </p>
+        </form>
+        <div class="info">
+            ※アカウント情報を同期することで、すでに登録された動画情報と同期をとることができます。<br />
         </div>
     </div>
     <div class="account_setting_detail">
