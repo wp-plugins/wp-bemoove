@@ -372,7 +372,8 @@ class BeMoOve_Admin_Class {
             </p>
         </form>
         <div class="info">
-            ※一度削除したアカウント情報は復元できませんのでご注意ください。
+            ※一度削除したアカウント情報は復元できませんのでご注意ください。<br />
+            ※アカウントを削除すると登録した動画データも削除されます。<br />
         </div>
     </div>
 </div>
@@ -1157,6 +1158,8 @@ class BeMoOve_Admin_Class {
                         <li>(2)&nbsp;公開したい動画の「貼り付け用タグ」項目にあるタグをコピー（例：[<?php print(BeMoOveTag::WP_BeMoOve_TAG_ATTR_NAME) ?>="Test"]）</li>
                         <li>(3)&nbsp;記事投稿時の入力フォーム内の任意の位置に(2)のコードをペースト</li>
                         <li>(4)&nbsp;記事公開画面にて動画が表示されていることを確認</li>
+                        <li>※貼り付け用タグを幅と高さを指定した記述にすることで、動画の表示サイズを変更できます。<br />
+                        （例：[<?php print(BeMoOveTag::WP_BeMoOve_TAG_ATTR_NAME) ?>="Test(400, 300)"]と記述することで、動画サイズを&nbsp;400px&nbsp;×&nbsp;300px&nbsp;で表示できます。）</li>
                     </ul>
                 </div>
                 <div class="help_detail">
@@ -1166,6 +1169,15 @@ class BeMoOve_Admin_Class {
                         <li>(2)&nbsp;公開したい動画の「ソース」項目にあるタグをコピー（&lt;scriptで始まっている文字列）</li>
                         <li>(3)&nbsp;公開したいHTMLファイルの任意の位置に(2)のコードをペースト</li>
                         <li>(4)&nbsp;公開したいWebページにて動画が表示されていることを確認</li>
+                    </ul>
+                </div>
+                <div class="help_detail">
+                    <h3>■動画の編集</h3>
+                    <ul>
+                        <li>(1)&nbsp;WordPress管理画面左メニューの「動画一覧」項目をクリック</li>
+                        <li>(2)&nbsp;公開したい動画の画像をクリック</li>
+                        <li>(3)&nbsp;動画詳細画面下部の「設定を変更する」ボタンをクリック</li>
+                        <li>(4)&nbsp;動画編集画面より、サムネイル画像等の編集が可能</li>
                     </ul>
                 </div>
                 <div class="help_detail">
