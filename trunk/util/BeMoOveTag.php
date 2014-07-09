@@ -208,8 +208,8 @@ class BeMoOveTag {
                     . '<td rowspan="7" style="text-align: center; background-color: #fff; width: 130px;">'
                     . ($this->isFlagOn()
                           ? ('<img src="'.WP_BeMoOve__PLUGIN_URL.'/images/noimage.jpg" width="120">')
-                          : ('<a href="admin.php?page=BeMoOve_movies_list&m=details&hash=' . $this->getVideoHash() . '"">'
-                             . '<img src="' . $this->getDispThumbnailFile($userAccountInfo) . '" width="120">'
+                          : ('<a class="movie_detail_lnk" href="admin.php?page=BeMoOve_movies_list&m=details&hash=' . $this->getVideoHash() . '"">'
+                             . '<img src="' . $this->getDispThumbnailFile($userAccountInfo) . '" width="120"><br /><span>詳細>></span>'
                              . '</a>'))
                     . '</td>'
                     . '<td style="background-color: #ccc; width: 110px; vertical-align: top;">貼り付け用タグ</td>'

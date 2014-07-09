@@ -110,6 +110,15 @@ a.link_btn:hover, a.link_btn:active {
     margin: 10px 0 40px 10px;
 }
 
+/* style for movie list page */
+a.movie_detail_lnk:link > img {
+    border: 3px #0000EE solid!important;
+}
+a.movie_detail_lnk:visited > img {
+    border: 3px #551A8B solid!important;
+}
+
+
 /* style for movie detail page */
 table.detail {
     background-color: #bbbbbb;
