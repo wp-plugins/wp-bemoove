@@ -89,6 +89,16 @@ class BeMoOveTag {
         return $this->dbData->social_share_flag == 1;
     }
 
+    function getLogoFile() {
+
+        return htmlspecialchars($this->dbData->logo_file);
+    }
+
+    function getLogoLink() {
+
+        return htmlspecialchars($this->dbData->logo_link);
+    }
+
     function __construct($dbData){
 
         $this->dbData = $dbData;
@@ -165,6 +175,8 @@ class BeMoOveTag {
         $behlsHostName = $userAccountInfo->getDeliveryBehlsHost();
         $accountId = $userAccountInfo->getAccountId();
         $isSocial = $this->isSocialShare();
+        $logoFile = $this->getLogoFile();
+        $logoLink = $this->getLogoLink();
 
         return "<div id=\"{$tagId}\">Loading the player...</div>
 <script type=\"text/javascript\">
@@ -180,6 +192,7 @@ class BeMoOveTag {
             width: \"{$showWidth}\",
             height: \"{$showHeight}\",
             " . ($isSocial ? "sharing: {}," : "") . "
+            " . ((empty($logoFile) || empty($logoLink)) ? "" : "logo: { file: '{$logoFile}', link: '{$logoLink}' }") . "
         });
     } else {
         document.getElementById(\"{$tagId}\").innerHTML

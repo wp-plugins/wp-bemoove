@@ -860,8 +860,14 @@ class BeMoOve_Admin_Class {
                 // ソーシャル連携の編集
                 $social = $_POST['social'] == '1';
                 $set_arr += array('social_share_flag' => $social ? 1 : 0);
-                $this->getWPMovieMetaDataAdapter()->update($set_arr, array('video_hash' => $video_hash));
 
+                // ロゴの部分
+                $logoFile = $_POST['logo_file'];
+                $set_arr += array('logo_file' => $logoFile);
+                $logoLink = $_POST['logo_link'];
+                $set_arr += array('logo_link' => $logoLink);
+
+                $this->getWPMovieMetaDataAdapter()->update($set_arr, array('video_hash' => $video_hash));
                 $editMsg .= '設定を保存しました。';
             }
 ?>
@@ -881,18 +887,29 @@ class BeMoOve_Admin_Class {
         <form action="" method="post">
             <table class="edit">
                 <tr>
-                    <th class="short"><label for="thumbnail_file_path">Thumbnail File Path</label></th>
+                    <th class="short" colspan="2"><label for="thumbnail_file_path">サムネイルファイル</label></th>
                     <td class="short"><input type="text" id="thumbnail_file_path" name="thumbnail_file_path" style="width: 100%;"
                         value="<?php print($beMoOveTag->getDispThumbnailFile($this->getUserAccountInfo())) ?>" /></td>
                 </tr>
                 <tr>
-                    <th class="short">ソーシャル連携</th>
-                    <td class="short">
+                    <th class="short" colspan="2">ソーシャル連携</th>
+                    <td class="short" class="short">
                         <input id="social_on" type="radio" name="social" value="1" <?php print($beMoOveTag->isSocialShare() ? 'checked="checked"' : '') ?> />
                         <label for="social_on">ON</label>
                         <input id="social_off" type="radio" name="social" value="0" <?php print($beMoOveTag->isSocialShare() ? '' : 'checked="checked"') ?> />
                         <label for="social_off">OFF</label>
                     </td>
+                </tr>
+                <tr>
+                    <th rowspan="2">ロゴ</th>
+                    <th><label for="logo_file">ファイル</label></th>
+                    <td class="short"><input type="text" id="logo_file" name="logo_file" style="width: 100%;"
+                        value="<?php print($beMoOveTag->getLogoFile()) ?>" placeholder="http://www.bemoove.jp/images/header_logo.gif" /></td>
+                </tr>
+                <tr>
+                    <th><label for="logo_link">リンク</label></th>
+                    <td class="short"><input type="text" id="logo_link" name="logo_link" style="width: 100%;"
+                        value="<?php print($beMoOveTag->getLogoLink()) ?>" placeholder="http://www.bemoove.jp/" /></td>
                 </tr>
             </table>
             <input type="hidden" name="edit" value="1" />
@@ -905,6 +922,8 @@ class BeMoOve_Admin_Class {
             ※サムネイルファイルは、ファイルのURLを指定してください。<br />
             ※サムネイルファイルは、入力を空にして保存することで、アップロード時のものに戻すことができます。<br />
             ※ソーシャル連携をONにすることで、閲覧ページにて動画にソーシャル連携用のオーバーレイが表示されます。<br />
+            ※ロゴファイルとロゴリンクを設定することで、動画右上隅にロゴを表示することができます。ロゴをクリックすると、設定したロゴリンクに遷移させることができます。<br />
+            ※ロゴファイルはファイルのURLを、ロゴリンクは遷移させたいページのURLをそれぞれ指定してください。<br />
         </div>
     </div>
 <?php
