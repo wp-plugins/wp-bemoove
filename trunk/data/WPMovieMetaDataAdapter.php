@@ -41,12 +41,26 @@ class WPMovieMetaDataAdapter {
 
         // カラム追加分
         $wpdb = $this->getWbdb();
-        $sql = "DESCRIBE {$this->table_name} social_share_flag;";
-        $ret = $wpdb->query($sql);
-        if (empty($ret)) {
+        if (!$this->isColumnExists('social_share_flag')) {
             $sql = "ALTER TABLE {$this->table_name} ADD social_share_flag int(1) NOT NULL DEFAULT '1';";
             $wpdb->query($sql);
         }
+        if (!$this->isColumnExists('logo_file')) {
+            $sql = "ALTER TABLE {$this->table_name} ADD logo_file varchar(255) NOT NULL;";
+            $wpdb->query($sql);
+        }
+        if (!$this->isColumnExists('logo_link')) {
+            $sql = "ALTER TABLE {$this->table_name} ADD logo_link varchar(255) NOT NULL;";
+            $wpdb->query($sql);
+        }
+    }
+
+    private function isColumnExists($coloumnName) {
+
+        $wpdb = $this->getWbdb();
+        $sql = "DESCRIBE {$this->table_name} {$coloumnName};";
+        $ret = $wpdb->query($sql);
+        return !empty($ret);
     }
 
     function  getCount() {
