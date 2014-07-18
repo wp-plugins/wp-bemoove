@@ -941,33 +941,35 @@ class BeMoOve_Admin_Class {
             print("<br />");
 
             $data = $apiClient->getVideo($video_hash);
-
-            print('
-                <table class="detail">
-                    <tr><th colspan="2">VIDEO</th></tr>
-                    <tr><th class="short">tag</th><td class="short">'.$data[getVideo][item][video][tag].'</td></tr>
-                    <tr><th class="short">hash</th><td class="short">'.$data[getVideo][item][video][hash].'</td></tr>
-                    <tr><th class="short">file_tag</th><td class="short">'.$data[getVideo][item][video][file_tag].'</td></tr>
-                    <tr><th class="short">file_hash</th><td class="short">'.$data[getVideo][item][video][file_hash].'</td></tr>
-                    <tr><th class="short">file_path</th><td class="short">'.$data[getVideo][item][video][file_path].'</td></tr>
-                    <tr><th class="short">size</th><td class="short">'.$data[getVideo][item][video][size].'</td></tr>
-                    <tr><th class="short">duration</th><td class="short">'.$data[getVideo][item][video][duration].'</td></tr>
-                    <tr><th class="short">convert_time</th><td class="short">'.$data[getVideo][item][video][convert_time].'</td></tr>
-                    <tr><th class="short">s</th><td class="short">'.$data[getVideo][item][video][s].'</td></tr>
-                    <tr><th class="short">aspect</th><td class="short">'.$data[getVideo][item][video][aspect].'</td></tr>
-                    <tr><th class="short">r</th><td class="short">'.$data[getVideo][item][video][r].'</td></tr>
-                    <tr><th class="short">b</th><td class="short">'.$data[getVideo][item][video][b].'</td></tr>
-                    <tr><th class="short">ar</th><td class="short">'.$data[getVideo][item][video][ar].'</td></tr>
-                    <tr><th class="short">ab</th><td class="short">'.$data[getVideo][item][video][ab].'</td></tr>
-                    <tr><th class="short">ac</th><td class="short">'.$data[getVideo][item][video][ac].'</td></tr>
-                    <tr><th class="short">profile</th><td class="short">'.$data[getVideo][item][video][profile].'</td></tr>
-                    <tr><th class="short">level</th><td class="short">'.$data[getVideo][item][video][level].'</td></tr>
-                    <tr><th class="short">created_at</th><td class="short">'.$data[getVideo][item][video][created_at].'</td></tr>
-                    <tr><th colspan="2">THUMBNAIL</th></tr>
-                    <tr><th class="short">file_path</th><td class="short">'.$beMoOveTag->getDispThumbnailFile($this->getUserAccountInfo()).'</td></tr>
-                </table>
-            ');
 ?>
+            <table class="detail">
+                <tr><th colspan="2">動画</th></tr>
+                <tr><th class="short">tag</th><td class="short"><?php echo $data[getVideo][item][video][tag] ?></td></tr>
+                <tr><th class="short">hash</th><td class="short"><?php echo $data[getVideo][item][video][hash] ?></td></tr>
+                <tr><th class="short">file_tag</th><td class="short"><?php echo $data[getVideo][item][video][file_tag] ?></td></tr>
+                <tr><th class="short">file_hash</th><td class="short"><?php echo $data[getVideo][item][video][file_hash] ?></td></tr>
+                <tr><th class="short">file_path</th><td class="short"><?php echo $data[getVideo][item][video][file_path] ?></td></tr>
+                <tr><th class="short">size</th><td class="short"><?php echo $data[getVideo][item][video][size] ?></td></tr>
+                <tr><th class="short">duration</th><td class="short"><?php echo $data[getVideo][item][video][duration] ?></td></tr>
+                <tr><th class="short">convert_time</th><td class="short"><?php echo $data[getVideo][item][video][convert_time] ?></td></tr>
+                <tr><th class="short">s</th><td class="short"><?php echo $data[getVideo][item][video][s] ?></td></tr>
+                <tr><th class="short">aspect</th><td class="short"><?php echo $data[getVideo][item][video][aspect] ?></td></tr>
+                <tr><th class="short">r</th><td class="short"><?php echo $data[getVideo][item][video][r] ?></td></tr>
+                <tr><th class="short">b</th><td class="short"><?php echo $data[getVideo][item][video][b] ?></td></tr>
+                <tr><th class="short">ar</th><td class="short"><?php echo $data[getVideo][item][video][ar] ?></td></tr>
+                <tr><th class="short">ab</th><td class="short"><?php echo $data[getVideo][item][video][ab] ?></td></tr>
+                <tr><th class="short">ac</th><td class="short"><?php echo $data[getVideo][item][video][ac] ?></td></tr>
+                <tr><th class="short">profile</th><td class="short"><?php echo $data[getVideo][item][video][profile] ?></td></tr>
+                <tr><th class="short">level</th><td class="short"><?php echo $data[getVideo][item][video][level] ?></td></tr>
+                <tr><th class="short">created_at</th><td class="short"><?php echo $data[getVideo][item][video][created_at] ?></td></tr>
+                <tr><th colspan="2">サムネイル</th></tr>
+                <tr><th class="short">ファイルURL</th><td class="short"><?php echo $beMoOveTag->getDispThumbnailFile($this->getUserAccountInfo()) ?></td></tr>
+                <tr><th colspan="2">ソーシャル連携</th></tr>
+                <tr><th class="short">ON&nbsp;/&nbsp;OFF</th><td class="short"><?php echo $beMoOveTag->isSocialShare() ? "ON" : "OFF" ?></td></tr>
+                <tr><th colspan="2">ロゴ</th></tr>
+                <tr><th class="short">ファイルURL</th><td class="short"><?php echo $beMoOveTag->getLogoFile() ?></td></tr>
+                <tr><th class="short">リンクURL</th><td class="short"><?php echo $beMoOveTag->getLogoLink() ?></td></tr>
+            </table>
         <div style="margin-top: 20px;"><a href="admin.php?page=BeMoOve_movies_list&m=edit&hash=<?php print($video_hash) ?>" class="link_btn">設定を変更する</a></div>
     </div>
 <?php
