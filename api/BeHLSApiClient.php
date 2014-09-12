@@ -22,7 +22,19 @@ class BeHLSApiClient {
         } else {
             // admin_apikeyが設定されていない場合は、アカウントランダム作成を行う
             $apiRootUri = self::getAdminApiRootUriCore();
-            $response = file_get_contents("{$apiRootUri}/account/add.php");
+            // ip-address user-agent を転送
+            $ipAddress = $_SERVER["REMOTE_ADDR"];
+            $userAgent = $_SERVER["HTTP_USER_AGENT"];
+
+            $header = Array(
+                "User-Agent: {$userAgent}"
+                , "X-Forwarded-For: {$ipAddress}"
+            );
+            $context = stream_context_create(array('http' => array(
+                'method' => 'GET'
+                , 'header' => implode("\r\n", $header)
+            )));
+            $response = file_get_contents("{$apiRootUri}/account/add.php", false, $context);
             return self::createJsonFromHttpResponseCore($response);
         }
     }
