@@ -53,7 +53,7 @@ class UserAccountInfo {
 
     public static function getDeliveryBehlsHostCore() {
 
-        return (BEHLS_DELIVERY_HOST_NAME == '' ? getBehlsHostCore() : BEHLS_DELIVERY_HOST_NAME);
+        return (BEHLS_DELIVERY_HOST_NAME == '' ? self::getBehlsHostCore() : BEHLS_DELIVERY_HOST_NAME);
     }
 
     private function __construct($accountId, $accountApiprekey){
