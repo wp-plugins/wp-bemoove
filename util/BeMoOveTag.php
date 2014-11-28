@@ -178,14 +178,14 @@ class BeMoOveTag {
         $logoFile = $this->getLogoFile();
         $logoLink = $this->getLogoLink();
 
-        return "<div id=\"{$tagId}\">Loading the player...</div>
+        $ret = "<div id=\"{$tagId}\">Loading the player...</div>
 <script type=\"text/javascript\">
     var isAndroid = false;
     var isIOS = false;
     var ua = navigator.userAgent.toLowerCase();
     if (ua.match(/Android/i)) var isAndroid = true;
     if (ua.match(/iP(hone|ad|od)/i)) var isIOS = true;
-    if (!isAndroid && !isIOS) {
+    if (!(isAndroid || isIOS)) {
         jwplayer(\"{$tagId}\").setup({
             file: \"https://{$behlsHostName}/media/video/{$accountId}/{$this->getName()}.m3u8\",
             image: \"{$showThumbnailFile}\",
@@ -205,6 +205,7 @@ class BeMoOveTag {
             + \" </video>\";
     }
 </script>";
+        return preg_replace('/^(\s)+\r\n/m', '',$ret);
     }
 
     /**

@@ -122,14 +122,15 @@ add_filter('the_content', 'BeMoOve_embedcode');
 
 function BeMoOve_embedcode($text) {
 
-    return preg_replace_callback('/\[' . BeMoOveTag::WP_BeMoOve_TAG_ATTR_NAME . '=\".+\"\]/', BeMoOve_shortcode, $text);
+    $text = str_replace("!isAndroid &#038;&#038; !isIOS", "!isAndroid && !isIOS", $text);
+    return preg_replace_callback('/\[' . BeMoOveTag::WP_BeMoOve_TAG_ATTR_NAME . '=(\"|&#8221;).+(\"|&#8221;)\]/', BeMoOve_shortcode, $text);
 }
 
 function BeMoOve_shortcode($matches) {
 
-    preg_match('/\".+?\"/', $matches[0], $tag);
+    preg_match('/(\"|&#8221;).+?(\"|&#8221;)/', $matches[0], $tag);
 
-    $tagName = trim($tag[0], "\"");
+    $tagName = trim(trim($tag[0], "\""), "&#8221;");
     $bemooveTag = BeMoOveTag::createInstance($tagName);
 
     $userAccountInfo = UserAccountInfo::getInstance();
