@@ -45,7 +45,7 @@ function beMoOveHeader() {
     $userAccountInfo = UserAccountInfo::getInstance();
 
     $jwplayer = "<script type=\"text/javascript\"src=\"http://" . $userAccountInfo->getDeliveryBehlsHost() . "/js/jwplayer.js\"></script>
-<script type=\"text/javascript\">jwplayer.key=\"GExaQ71lyaswjxyW6fBfmJnwYHwXQ9VI1SSpWNtsQo4=\";</script>";
+<script type=\"text/javascript\">jwplayer.key=\"/EsnRMoZKvjtE62Y1a6a0HYDZ5HxymN21cuVnA==\";</script>";
     $result .= $jwplayer;
 
     $responsive = "<script type='text/javascript'>
