@@ -7,7 +7,11 @@ define('BEHLS_HOST_NAME', 'wordpress.behls-lite.jp');
 define('BEHLS_DELIVERY_HOST_NAME', 'wordpress.behls-lite.jp');
 
 /** BeHLsサーバーとの通信プロトコル（http or https） */
-define('BEHLS_PROTOCOL', 'https');
+if (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on") {
+   define("PROTOCOL", "https://");
+} else {
+   define("PROTOCOL", "http://");
+}
 
 /** アカウント操作を行う代理サーバーのホスト名 */
 define('BEHLS_ADMIN_PROXY_HOST_NAME', 'dev.behls.jp/wp-bemoove');
