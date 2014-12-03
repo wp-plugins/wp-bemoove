@@ -4,11 +4,11 @@ Plugin Name: WP_BeMoOve
 Plugin URI: http://www.bemoove.jp/lp/wpplugin/
 Description: Wordpressで動画を投稿、管理、再生するプラグイン
 Author: ビムーブ株式会社 (BeMoOve Co.,Ltd)
-Version: 1.2.0
+Version: 1.3.0
 Author URI: http://www.bemoove.jp/
 */
 
-define('WP_BeMoOve_VERSION', '1.0.0');
+define('WP_BeMoOve_VERSION', '1.3.0');
 define('WP_BeMoOve__PLUGIN_URL', plugin_dir_url(__FILE__));
 define('WP_BeMoOve__PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('WP_BeMoOve_DELETE_LIMIT', 100000);
