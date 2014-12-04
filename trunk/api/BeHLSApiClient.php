@@ -92,12 +92,12 @@ class BeHLSApiClient {
     private static function getApiRootUriCore() {
 
         $hostName = UserAccountInfo::getBehlsHostCore();
-        return BEHLS_PROTOCOL . "://{$hostName}";
+        return PROTOCOL . "://{$hostName}";
     }
 
     private static function getAdminApiRootUriCore() {
 
-        return BEHLS_PROTOCOL . "://" . BEHLS_ADMIN_PROXY_HOST_NAME;
+        return PROTOCOL . "://" . BEHLS_ADMIN_PROXY_HOST_NAME;
     }
 
     private function getAccountApiKey($dt) {

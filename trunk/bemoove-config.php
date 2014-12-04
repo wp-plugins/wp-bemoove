@@ -8,9 +8,9 @@ define('BEHLS_DELIVERY_HOST_NAME', 'wordpress.behls-lite.jp');
 
 /** BeHLsサーバーとの通信プロトコル（http or https） */
 if (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on") {
-   define("PROTOCOL", "https://");
+   define("PROTOCOL", "https");
 } else {
-   define("PROTOCOL", "http://");
+   define("PROTOCOL", "http");
 }
 
 /** アカウント操作を行う代理サーバーのホスト名 */
