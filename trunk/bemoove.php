@@ -4,11 +4,11 @@ Plugin Name: WP_BeMoOve
 Plugin URI: http://www.bemoove.jp/lp/wpplugin/
 Description: Wordpressで動画を投稿、管理、再生するプラグイン
 Author: ビムーブ株式会社 (BeMoOve Co.,Ltd)
-Version: 1.3.1
+Version: 1.3.2
 Author URI: http://www.bemoove.jp/
 */
 
-define('WP_BeMoOve_VERSION', '1.3.1');
+define('WP_BeMoOve_VERSION', '1.3.2');
 define('WP_BeMoOve__PLUGIN_URL', plugin_dir_url(__FILE__));
 define('WP_BeMoOve__PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('WP_BeMoOve_DELETE_LIMIT', 100000);
@@ -123,14 +123,17 @@ add_filter('the_content', 'BeMoOve_embedcode');
 function BeMoOve_embedcode($text) {
 
     $text = str_replace("!isAndroid &#038;&#038; !isIOS", "!isAndroid && !isIOS", $text);
-    return preg_replace_callback('/\[' . BeMoOveTag::WP_BeMoOve_TAG_ATTR_NAME . '=(\"|&#8221;).+(\"|&#8221;)\]/', BeMoOve_shortcode, $text);
+    return preg_replace_callback('/\[' . BeMoOveTag::WP_BeMoOve_TAG_ATTR_NAME . '=(\"|&#8221;|&#8243;).+(\"|&#8221;|&#8243;)\]/', BeMoOve_shortcode, $text);
 }
 
 function BeMoOve_shortcode($matches) {
 
-    preg_match('/(\"|&#8221;).+?(\"|&#8221;)/', $matches[0], $tag);
+    preg_match('/(\"|&#8221;|&#8243;).+?(\"|&#8221;|&#8243;)/', $matches[0], $tag);
 
-    $tagName = trim(trim($tag[0], "\""), "&#8221;");
+    $tagName = $tag[0];
+    $tagName = str_replace(array("&#8221;", "&#8243;"), array("", ""), $tagName);
+    $tagName = trim($tagName, "\"");
+
     $bemooveTag = BeMoOveTag::createInstance($tagName);
 
     $userAccountInfo = UserAccountInfo::getInstance();
