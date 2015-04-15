@@ -3,7 +3,7 @@ class BeMoOveTag {
 
     const WP_BeMoOve_TAG_ATTR_NAME = 'bemoove_tag';
 
-    /** wp_movie_metaのレコードデータ */
+    /** wp_movie_metaのレコードデータ */ 
     private $dbData;
 
     private $overrideWidth;
@@ -41,9 +41,9 @@ class BeMoOveTag {
     }
 
     /**
-     * サムネイル表示用のファイルパスを取得する。
-     * ※変更後のURLはユーザ（管理者）入力値であるため、XSSに注意しhtmlエスケープを行ったものを表示する。
-     * @return string サムネイル表示用のファイルパス
+     * サムネイル表示用のファイルパスを取得する。  -  
+     * ※変更後のURLはユーザ（管理者）入力値であるため、XSSに注意しhtmlエスケープを行ったものを表示する。 
+     * @return string サムネイル表示用のファイルパス   
      */
     function getDispThumbnailFile(UserAccountInfo $userAccountInfo) {
 
@@ -105,16 +105,16 @@ class BeMoOveTag {
     }
 
     /**
-     * タグ名[bemoove_tag=hoge(width, height)]からインスタンスを生成する。
-     * @param $tagStr hoge(width, height)の部分の文字列
-     * @return BeMoOveTagインスタンス
+     * タグ名[bemoove_tag=hoge(width, height)]からインスタンスを生成する。    
+     * @param $tagStr hoge(width, height)の部分の文字列  
+     * @return BeMoOveTagインスタンス 
      */
     static function createInstance($tagStr) {
 
         $tagName = $tagStr;
         $overrideWidth = 0;
         $overrideHeight = 0;
-        // 表示用の幅と高さが指定されている場合は設定 tagname(width, height) の形式
+        // 表示用の幅と高さが指定されている場合は設定 tagname(width, height) の形式   
         if (strpos($tagStr, '(')) {
             $tagInfo = preg_split("/[,(]+/", $tagStr);
             $tagName = $tagInfo[0];
@@ -122,7 +122,7 @@ class BeMoOveTag {
             $overrideHeight = intval($tagInfo[2]);
         }
 
-        // wp_movie_metaテーブルからレコードを取得
+        // wp_movie_metaテーブルからレコードを取得   
         global $wpdb;
         $table_name = $wpdb->prefix . 'movie_meta';
         $get_list = $wpdb->get_results(
@@ -136,18 +136,18 @@ class BeMoOveTag {
     }
 
     /**
-     * 貼り付けコードを取得する
+     * 貼り付けコードを取得する 
      *
-     * @param $userAccountInfo アカウント情報
-     * @param $isIncludePlayer jwplayer.jsを含めるか否か
-     * @return 貼り付けコード
+     * @param $userAccountInfo アカウント情報  
+     * @param $isIncludePlayer jwplayer.jsを含めるか否か  
+     * @return 貼り付けコード  
      */
     function getEmbedSrc(UserAccountInfo $userAccountInfo, $isIncludePlayer) {
 
         $result = "";
         if ($isIncludePlayer === true) {
             $behlsHostName = $userAccountInfo->getDeliveryBehlsHost();
-            $result = "<script type=\"text/javascript\" src=\"http://{$behlsHostName}/js/jwplayer.js\"></script>
+            $result = "<script type=\"text/javascript\" src=\"".PROTOCOL."://{$behlsHostName}/js/jwplayer.js\"></script>
 <script type=\"text/javascript\">jwplayer.key=\"GExaQ71lyaswjxyW6fBfmJnwYHwXQ9VI1SSpWNtsQo4=\";</script>\r";
         }
 
@@ -156,10 +156,10 @@ class BeMoOveTag {
     }
 
     /**
-     * Html表示コピーペースト用の貼り付けコードを取得する
+     * Html表示コピーペースト用の貼り付けコードを取得する    
      *
-     * @param $userAccountInfo アカウント情報
-     * @return Html表示コピーペースト用の貼り付けコード
+     * @param $userAccountInfo アカウント情報  
+     * @return Html表示コピーペースト用の貼り付けコード   
      */
     function  getSrcForCopyPaste($userAccountInfo) {
 
@@ -187,7 +187,7 @@ class BeMoOveTag {
     if (ua.match(/iP(hone|ad|od)/i)) var isIOS = true;
     if (!(isAndroid || isIOS)) {
         jwplayer(\"{$tagId}\").setup({
-            file: \"https://{$behlsHostName}/media/video/{$accountId}/{$this->getName()}.m3u8\",
+            file: \"".PROTOCOL."://{$behlsHostName}/media/video/{$accountId}/{$this->getName()}.m3u8\",
             image: \"{$showThumbnailFile}\",
             width: \"{$showWidth}\",
             height: \"{$showHeight}\",
@@ -198,9 +198,10 @@ class BeMoOveTag {
         document.getElementById(\"{$tagId}\").innerHTML
             = \"\"
             + \"<video id=myVideo\"
-            + \" src='https://{$behlsHostName}/media/video/{$accountId}/{$this->getName()}.m3u8' \"
+            + \" src='".PROTOCOL."://{$behlsHostName}/media/video/{$accountId}/{$this->getName()}.m3u8' \"
             + \" poster='{$showThumbnailFile}' \"
             + \" width='{$showWidth}' height='{$showHeight}' \"
+            + \" onclick='this.play();' \"
             + \" controls>\"
             + \" </video>\";
     }
@@ -209,10 +210,10 @@ class BeMoOveTag {
     }
 
     /**
-     * 動画一覧画面の一動画あたりの表示情報を作成する。
+     * 動画一覧画面の一動画あたりの表示情報を作成する。 
      *
-     * @param $userAccountInfo アカウント情報
-     * @return 動画一覧画面の一動画あたりの表示情報
+     * @param $userAccountInfo アカウント情報   
+     * @return 動画一覧画面の一動画あたりの表示情報   
      */
     function createListItemInfo(UserAccountInfo $userAccountInfo) {
 
@@ -223,7 +224,7 @@ class BeMoOveTag {
                     . ($this->isFlagOn()
                           ? ('<img src="'.WP_BeMoOve__PLUGIN_URL.'/images/noimage.jpg" width="120">')
                           : ('<a class="movie_detail_lnk" href="admin.php?page=BeMoOve_movies_list&m=details&hash=' . $this->getVideoHash() . '"">'
-                             . '<img src="' . $this->getDispThumbnailFile($userAccountInfo) . '" width="120"><br /><span>詳細>></span>'
+                             . '<img src="' . $this->getDispThumbnailFile($userAccountInfo) . '" width="120"><br /><span> 詳細>></span>' 
                              . '</a>'))
                     . '</td>'
                     . '<td style="background-color: #ccc; width: 110px; vertical-align: top;">貼り付け用タグ</td>'
@@ -232,22 +233,23 @@ class BeMoOveTag {
                     . '</td>'
                     . '</tr>'
                     . '<tr>'
-                    . '<td style="background-color: #ccc; vertical-align: top;">ソース<br /><span style="font-size: 7px;">※HTMLに直接貼り付ける場合のソースコード</span></td>'
+                    . '<td style="background-color: #ccc; vertical-align: top;">ソース<br /><span style="font-size: 7px;">※ HTMLに直接貼り付ける場合のソースコード </span></td>' 
                     . '<td style="background-color: #fff; vertical-align: top;">'
                     . '<textarea rows="3" class="copy" style="width:100%;">' . $this->getSrcForCopyPaste($userAccountInfo) . '</textarea></td>'
                     . '</tr>'
-                    . '<tr>'
-                    . '<td style="background-color: #ccc; vertical-align: top;">ビデオサイズ</td>'
+                    . '<tr>' 
+                    . '<td style="background-color: #ccc; vertical-align: top;">ビデオサイズ</td>' 
                     . '<td style="background-color: #fff; vertical-align: top;">' . ($this->isFlagOn() ? '' : $this->getVideoWidth() . 'x' . $this->getVideoHeight()) . '</td>'
                     . '</tr>'
                     . '<tr>'
-                    . '<td style="background-color: #ccc; vertical-align: top;">再生時間</td>'
+                    . '<td style="background-color: #ccc; vertical-align: top;">再生時間</td>' 
                     . '<td style="background-color: #fff; vertical-align: top;">' . ($this->isFlagOn() ? '' : $this->getVideoTime()) . '</td>'
                     . '</tr>'
                     . '<tr>'
                     . '<td colspan="2" style="background-color: #ccc; vertical-align: top; text-align: right;">'
-                    . ($this->isFlagOn() ? '<span class="text-accent">※現在変換処理中です。もうしばらくお待ち下さい。</span>' : '')
-                    . '<input type="button" value="削除" onclick="var res = confirm(\'本当に削除してもよろしいですか？\');if( res == true ) {location.href = \'admin.php?page=BeMoOve_movies_list&m=delete&hash='.$this->getVideoHash().'\'}else{}" />'
+                    . ($this->isFlagOn() ? '<span class="text-accent">※ 現在変換処理中です。もうしばらくお待ち下さい。</span>' : '') 
+                    . '<!--<input type="button" value="Post" onclick="var ret = confirm(\'Are you sure you want to post this video to your wp site ?\');if( ret == true ){ alert(\''.mysql_real_escape_string($this->getSrcForCopyPaste($userAccountInfo)).'\'); }else{}" />-->' 
+                    . '<input type="button" value="削除" onclick="var res = confirm(\'本当に削除してもよろしいですか？\');if( res == true ) {location.href = \'admin.php?page=BeMoOve_movies_list&m=delete&hash='.$this->getVideoHash().'\'}else{}" />' 
                     . '</td>'
                     . '</tr>'
                     . '</table>'

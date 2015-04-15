@@ -20,7 +20,7 @@ class UserAccountInfo {
         return $this->accountApiprekey;
     }
 
-    /** アカウント設定が完了済か否か */
+    /** アカウント設定が完了済か否か  */
     function hasAccount() {
 
         return (!empty($this->accountId) && !empty($this->accountApiprekey));
@@ -31,8 +31,8 @@ class UserAccountInfo {
 
         if (isset($this->behlsHost)) return $this->behlsHost;
 
-        // 設定ファイルから読み込む
-        $this->behlsHost = self::getBehlsHostCore();
+        // 設定ファイルから読み込む   
+        $this->behlsHost = self::getBehlsHostCore(); 
         return $this->behlsHost;
     }
 
@@ -46,7 +46,7 @@ class UserAccountInfo {
 
         if (isset($this->deliveryBehlsHost)) return $this->deliveryBehlsHost;
 
-        // 設定ファイルから読み込む
+        // 設定ファイルから読み込む    
         $this->deliveryBehlsHost = self::getDeliveryBehlsHostCore();
         return $this->deliveryBehlsHost;
     }
@@ -64,7 +64,7 @@ class UserAccountInfo {
 
     static function getInstance() {
         $opt = get_option(self::OPTION_KEY);
-
+        
         return new UserAccountInfo(
             $opt[self::ACCOUNT_ID_PARAM_KEY]
             , $opt[self::ACCOUNT_APIPREKEY_PARAM_KEY]

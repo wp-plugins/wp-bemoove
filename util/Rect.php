@@ -18,7 +18,7 @@ class Rect {
 
     private $ratio;
     /**
-     * 縦横比を計算して返却します。
+     * 縦横比を計算して返却します。  
      */
     private function getRatio() {
 
@@ -34,7 +34,7 @@ class Rect {
             return $ratio;
         }
 
-        // 最大公約数を取得し、除算して返却
+        // 最大公約数を取得し、除算して返却  
         $gcd = $this->getGcd($this->getWidth(), $this->getHeight());
 
         return array($this->getWidth() / $gcd, $this->getHeight() / $gcd);
