@@ -1,6 +1,6 @@
 <?php
 /**
- * [wp_movie_meta]テーブルの情報をやりとりするクラス
+ * [wp_movie_meta]テーブルの情報をやりとりするクラス     class to exchange the information of [wp_movie_meta] table
  */
 class WPMovieMetaDataAdapter {
 
@@ -39,7 +39,7 @@ class WPMovieMetaDataAdapter {
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql);
 
-        // カラム追加分
+        // カラム追加分    -   Column Additions
         $wpdb = $this->getWbdb();
         if (!$this->isColumnExists('social_share_flag')) {
             $sql = "ALTER TABLE {$this->table_name} ADD social_share_flag int(1) NOT NULL DEFAULT '1';";
