@@ -1,0 +1,189 @@
+@charset "utf-8";
+
+h3 {
+    font-weight: bold;
+}
+
+a.link_btn {
+    padding: 5px 10px;
+    background: #2ea2cc;
+    border-color: #0074a2;
+    box-shadow: inset 0 1px 0 rgba(120,200,230,.5),0 1px 0 rgba(0,0,0,.15);
+    color: #fff;
+    text-decoration: none;
+    -webkit-border-radius: 2px;
+}
+
+a.link_btn:hover, a.link_btn:active {
+    background: #0074a2;
+    color: #fff;
+}
+
+.page{
+    list-style-type:none;
+    float:left;
+    margin:2px;
+    border: #bbbbbb 1px solid;
+    background-color:#fff;
+}
+
+.page a {
+    display:block;
+    width:18;
+    padding:5px 5px 5px 5px;
+    text-decoration:none;
+
+}
+
+.page a:hover {
+    background-color:#0000cc;
+    color:#ffffff;
+}
+
+.page_on{
+    background-color:#aaaaaa;
+    list-style-type:none;
+    float:left;
+    margin:2px;
+    width:18;
+    padding:5px 5px 5px 5px;
+    border: #bbbbbb 1px solid;
+}
+
+.text-accent {
+    color: red;
+}
+
+.fade_msg_box {
+    color: #000;
+    background-color: #fff;
+    opacity: .8;
+    width: 50%;
+    padding: 10px 15px;
+    position: absolute;
+    top: 100px;
+    left: 50px;
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
+    max-width: 600px;
+    -webkit-transition: 1s;
+    transition: 1s;
+    z-index: 999;
+}
+
+.bemoove_title {
+    color: #555;
+    background-color: #eee;
+    font-size: 100%;
+    padding:5px;
+}
+
+.bemoove_description {
+    color: #888;
+    margin:0px;
+    padding:0px;
+}
+
+/* style for welcome page */
+.welcome_area .info {
+    margin: 10px 0 25px 10px;
+}
+
+#privacy_area {
+    border: solid 1px rgb(216,216,216);
+    display: block;
+    margin: 0 0 10px 5px;
+    background-color: white;
+}
+
+.welcome_area .form_area {
+    margin: 20px auto;
+    text-align: center;
+}
+
+.welcome_area .restart_area {
+    margin: 40px auto 10px auto;
+    text-align: center;
+}
+
+.welcome_area .navi_area {
+    margin: 10px 0 40px 10px;
+}
+
+/* style for movie list page */
+a.movie_detail_lnk:link > img {
+    border: 3px #0000EE solid!important;
+}
+a.movie_detail_lnk:visited > img {
+    border: 3px #551A8B solid!important;
+}
+
+
+/* style for movie detail page */
+table.detail {
+    background-color: #bbbbbb;
+    border-spacing: 1px;
+}
+
+table.detail th, table.detail td {
+    padding: 5px;
+}
+
+table.detail th {
+    text-align: left;
+    background-color: #ccc;
+}
+
+table.detail th.short {
+    width: 90px;
+}
+
+table.detail td {
+    background-color: #fff;
+}
+
+table.detail td.short {
+    width: 300px;
+}
+
+/* style for movie edit page */
+table.edit {
+    background-color: #bbbbbb;
+    border-spacing: 1px;
+}
+
+table.edit th, table.edit td {
+    padding: 5px;
+}
+
+table.edit th {
+    text-align: left;
+    background-color: #ccc;
+}
+
+table.edit th.short {
+    width: 180px;
+}
+
+table.edit td {
+    background-color: #fff;
+}
+
+table.edit td.short {
+    width: 400px;
+}
+
+
+/* style for setting page */
+.account_setting_content .account_setting_detail {
+    margin: 0 0 50px 10px;
+}
+
+/* style for help page */
+.help_content {
+    margin-left: 8px;
+}
+
+.help_detail {
+    margin-bottom: 30px;
+}
