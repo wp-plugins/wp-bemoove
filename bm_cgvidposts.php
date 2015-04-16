@@ -186,6 +186,12 @@ class wp_cgmCLass{
             require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
             dbDelta( $sql ); 
 
+            $myChecker = $wpdb->get_row("SELECT * FROM $table_name");
+            
+            if(!isset($myChecker->shortdesc)){
+              $wpdb->query("ALTER TABLE $table_name ADD shortdesc  TEXT COLLATE utf8_general_ci");
+            }
+
         }
 
   public function createInsertMrss($info){ // <---------------- この関数はMRSSを追加する記事を選択し挿入するには
