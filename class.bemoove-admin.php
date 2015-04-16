@@ -1158,7 +1158,7 @@ function BeMoOve_Contact_Page(){
     } 
 
     function cmt_activate(WPMovieMetaDataAdapter $wPMovieMetaDataAdapter) {
-        $cmt_db_version = '1.2.0';
+        $cmt_db_version = '1.2.1';
         $installed_ver = get_option('cmt_meta_version');
         // テーブルのバージョンが違ったら作成
         if ($installed_ver != $cmt_db_version) {
