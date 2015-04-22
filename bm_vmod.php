@@ -194,8 +194,6 @@ echo "
 }
 </style>";
 
-echo "<br><br><br>";
-
 if(isset($_GET['dpage'])){ $dpage=$_GET['dpage']; }else{ $dpage=1; }
 
 
@@ -216,7 +214,7 @@ echo "<div style='color:red; float:right; margin-right:10px; margin-top:5px;'><a
 	$bm_sdesc_val2=$bmcg_class->bm_mrss_checkdesc($_GET['adesc']);
 	echo '<form name="sdesc" action="?page=BeMoOve_vpost&dpage='.$dpage.'" method="POST">
 	    <input type="hidden" name="bm_id" value="'.$_GET['adesc'].'">
-		<p><label style="font-weight:700;">簡単詳細:<br>
+		<p><label style="font-weight:700;">簡易詳細:<br>
 		<div class="textwrapper">
 		<textarea name="mrss_sdesc" style="cursor: pointer;margin: 0; padding: 0; border-width: 0; width: 100%;  max-width: 100%; max-height: 280px; height: 280px;">';
 		if($bm_sdesc_val2!='NULL' && $bm_sdesc_val2!=''){ echo $bm_sdesc_val2; }
@@ -230,10 +228,11 @@ echo "<div style='color:red; float:right; margin-right:10px; margin-top:5px;'><a
 echo "</div>";
 }
 
-
-echo "<h3>サイト名: <label style='color:#339933; font-weight: normal;'>".BM_MYWP_SITENAME.'</label></h3>'; //現在のサイト名 を表示します
-echo "<h3>サイトのURL: <label style='color:#339933; font-weight: normal;'>".BM_MYWP_SITEURL.'</label></h3>'; //現在のサイトのURL を表示する
-echo "<h3>MRSSリンク: <a style='color:#339933; font-weight: normal;' target='_blank' href='".BM_MYWP_SITEURL."wp-content/plugins/wp-bemoove/bmxml_mrss.php'>".BM_MYWP_SITEURL."wp-content/plugins/wp-bemoove/bmxml_mrss.php</a></h3>";
+echo "<div class='wrap'>
+        <h2>MRSSの設定</h2>";
+//echo "<h3>サイト名: <label style='color:#339933; font-weight: normal;'>".BM_MYWP_SITENAME.'</label></h3>'; //現在のサイト名 を表示します
+//echo "<h3>サイトのURL: <label style='color:#339933; font-weight: normal;'>".BM_MYWP_SITEURL.'</label></h3>'; //現在のサイトのURL を表示する
+echo "<h3>MRSSリンク: <a style='color:#339933; font-weight: normal;' target='_blank' href='".BM_MYWP_SITEURL."/wp-content/plugins/wp-bemoove/bmxml_mrss.php'>".BM_MYWP_SITEURL."/wp-content/plugins/wp-bemoove/bmxml_mrss.php</a></h3>";
 echo "<table  class='CSSTableGenerator' >";
 echo "
         <td style=''>件名</td>
@@ -242,11 +241,9 @@ echo "
         <td>カテゴリー</td>
         <td>日付</td>
         <td>アクション</td>
-  	    </tr>
+      </tr>
+    </div>
  	 ";
-
-
-
 
 // ディスプレイビデオの記事情報
 $itemCount = 0;

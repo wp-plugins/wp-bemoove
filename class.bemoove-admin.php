@@ -1167,7 +1167,7 @@ function BeMoOve_Contact_Page(){
         }
     } 
     function get_pagination() {
-        $m_hr = WP_BeMoOve_ITEMS_LIMIT; //表示最大数   
+        $m_hr = WP_BeMoOve_ITEMS_LIMIT; //表示最大数
 
         if ($_GET["s"] == "") $_GET["s"] = 0;
 
@@ -1205,65 +1205,74 @@ function BeMoOve_Contact_Page(){
             <h2>使い方</h2>
             <div class="help_content">
                 <div class="help_detail">
-                    <h3>■ 動画のアップロード </h3> 
+                    <h3>■ 動画のアップロード </h3>
                     <ul>
-                        <li>(1)&nbsp;WordPress管理画面左メニューの「新規追加」項目をクリック</li> 
-                        <li>(2)&nbsp;動画名を入力（半角英数80文字まで）して「次へ」をクリック</li> 
-                        <li>(3)&nbsp;アップロードファイルを「参照」し、各種項目を設定し「アップロード」ボタンをクリック</li> 
-                        <li>(4)&nbsp;WordPress管理画面左メニューの「動画一覧」項目にて動画がアップロードされていることを確認 </li> 
+                        <li>(1)&nbsp;WordPress管理画面左メニューの「新規追加」項目をクリック</li>
+                        <li>(2)&nbsp;動画名を入力（半角英数80文字まで）して「次へ」をクリック</li>
+                        <li>(3)&nbsp;アップロードファイルを「参照」し、各種項目を設定し「アップロード」ボタンをクリック</li>
+                        <li>(4)&nbsp;WordPress管理画面左メニューの「動画一覧」項目にて動画がアップロードされていることを確認</li>
                     </ul>
                 </div>
                 <div class="help_detail">
-                    <h3>■ 動画の公開（WordPress投稿内の利用）</h3> 
+                    <h3>■ 動画の公開（WordPress投稿内の利用）</h3>
                     <ul>
-                        <li>(1)&nbsp;WordPress管理画面左メニューの「動画一覧」項目をクリック</li> 
-                        <li>(2)&nbsp;公開したい動画の「貼り付け用タグ」項目にあるタグをコピー（例：[<?php print(BeMoOveTag::WP_BeMoOve_TAG_ATTR_NAME) ?>="Test"]）</li> 
+                        <li>(1)&nbsp;WordPress管理画面左メニューの「動画一覧」項目をクリック</li>
+                        <li>(2)&nbsp;公開したい動画の「貼り付け用タグ」項目にあるタグをコピー（例：[<?php print(BeMoOveTag::WP_BeMoOve_TAG_ATTR_NAME) ?>="Test"]）</li>
                         <li>(3)&nbsp;記事投稿時の入力フォーム内の任意の位置に(2)のコードをペースト</li>
                         <li>(4)&nbsp;記事公開画面にて動画が表示されていることを確認</li>
-                        <li>※ 貼り付け用タグを幅と高さを指定した記述にすることで、動画の表示サイズを変更できます。<br /> 
-                        （例：[<?php print(BeMoOveTag::WP_BeMoOve_TAG_ATTR_NAME) ?>="Test(400, 300)"]と記述することで、動画サイズを&nbsp;400px&nbsp;×&nbsp;300px&nbsp;で表示できます。）</li> 
+                        <li>※ 貼り付け用タグを幅と高さを指定した記述にすることで、動画の表示サイズを変更できます。<br />
+                        （例：[<?php print(BeMoOveTag::WP_BeMoOve_TAG_ATTR_NAME) ?>="Test(400, 300)"]と記述することで、動画サイズを&nbsp;400px&nbsp;×&nbsp;300px&nbsp;で表示できます。）</li>
                     </ul>
                 </div>
                 <div class="help_detail">
                     <h3>■ 動画の公開（WordPress投稿外の利用）</h3>
                     <ul>
                         <li>(1)&nbsp;WordPress管理画面左メニューの「動画一覧」項目をクリック</li>
-                        <li>(2)&nbsp;公開したい動画の「ソース」項目にあるタグをコピー（&lt;scriptで始まっている文字列）</li> 
-                        <li>(3)&nbsp;公開したいHTMLファイルの任意の位置に(2)のコードをペースト</li> 
-                        <li>(4)&nbsp;公開したいWebページにて動画が表示されていることを確認</li> 
+                        <li>(2)&nbsp;公開したい動画の「ソース」項目にあるタグをコピー（&lt;scriptで始まっている文字列）</li>
+                        <li>(3)&nbsp;公開したいHTMLファイルの任意の位置に(2)のコードをペースト</li>
+                        <li>(4)&nbsp;公開したいWebページにて動画が表示されていることを確認</li>
                     </ul>
                 </div>
                 <div class="help_detail">
                     <h3>■ 動画の編集</h3>
                     <ul>
                         <li>(1)&nbsp;WordPress管理画面左メニューの「動画一覧」項目をクリック</li>
-                        <li>(2)&nbsp;公開したい動画の画像をクリック </li>
-                        <li>(3)&nbsp;動画詳細画面下部の「設定を変更する」ボタンをクリック</li> 
-                        <li>(4)&nbsp;動画編集画面より、サムネイル画像等の編集が可能</li> 
+                        <li>(2)&nbsp;公開したい動画の画像をクリック</li>
+                        <li>(3)&nbsp;動画詳細画面下部の「設定を変更する」ボタンをクリック</li>
+                        <li>(4)&nbsp;動画編集画面より、サムネイル画像等の編集が可能</li>
                     </ul>
                 </div>
                 <div class="help_detail">
-                    <h3>■ アカウントの移設</h3> 
-                    <p>別ドメインのWordPressに現在のアカウントでアップロードした動画などを移設することができます。</p> 
+                    <h3>■ アカウントの移設</h3>
+                    <p>別ドメインのWordPressに現在のアカウントでアップロードした動画などを移設することができます。</p>
                     <ul>
-                        <li>(1)&nbsp;WordPress管理画面左メニューの「アカウント設定」項目をクリック</li> 
-                        <li>(2)&nbsp;「account_id」と「account_apiprekey」の文字列を別途保存しておく" </li> 
-                        <li>(3)&nbsp;移設先のWordPressに「WP-BemoovePlugin」をインストールし有効化する</li> 
-                        <li>(4)&nbsp;利用開始準備画面にて「アカウントを持っている利用者」向けのリンクをクリック</li> 
-                        <li>(5)&nbsp;別途保存していた「account_id」と「account_apiprekey」を登録 "</li> 
+                        <li>(1)&nbsp;WordPress管理画面左メニューの「アカウント設定」項目をクリック</li>
+                        <li>(2)&nbsp;「account_id」と「account_apiprekey」の文字列を別途保存しておく</li>
+                        <li>(3)&nbsp;移設先のWordPressに「WP-BemoovePlugin」をインストールし有効化する</li>
+                        <li>(4)&nbsp;利用開始準備画面にて「アカウントを持っている利用者」向けのリンクをクリック</li>
+                        <li>(5)&nbsp;別途保存していた「account_id」と「account_apiprekey」を登録</li>
                     </ul>
                 </div>
                 <div class="help_detail">
-                    <h3>■ ストレージ容量の追加 </h3> 
-                    <p>ストレージ1GB制限を10GBにアップグレードすることが可能です。<br />詳しくは公式サイトをご覧いただくか、ビムーブ株式会社までお問い合わせください。</p> 
+                    <h3>■ MRSS機能について</h3>
+                    <p>動画情報を含むRSSフィードを出力することが可能です。</p>
                     <ul>
-                        <li><a target="_blank" href="http://www.bemoove.jp/lp/wpplugin/">ビムーブ公式サイト「WP-BemoovePlugin」紹介ページはこちら</a></li> 
-                        <li><a target="_blank" href="https://www.bemoove.jp/contact/">ビムーブへのお問い合わせはこちら</a></li> 
+                        <li>(1)&nbsp;WordPress管理画面左メニューの「MRSS」項目をクリック</li>
+                        <li>(2)&nbsp;「簡易説明を編集」をクリック</li>
+                        <li>(3)&nbsp;記事に含まれる動画について簡単な説明を入力し、「保存」ボタンを押す</li>
+                        <li>(4)&nbsp;サイトの設定で、MRSSへのリンクをMRSSリンクのURLにリダイレクトする</li>
+                    </ul>
+                </div>
+                <div class="help_detail">
+                    <h3>■ ストレージ容量の追加 </h3>
+                    <p>BeHLSをご契約頂くことで可能です。<br />詳しくは公式サイトをご覧いただくか、下記リンクまでお問い合わせください。</p>
+                    <ul>
+                        <li><a target="_blank" href="http://www.bemoove.jp/lp/wpplugin/">「WP-BemoovePlugin」紹介ページはこちら</a></li>
+                        <li><a target="_blank" href="https://www.bemoove.jp/contact/">お問い合わせはこちら</a></li>
                     </ul>
                 </div>
             </div>
         </div>
 <?php
-    } 
-
+    }
 }
