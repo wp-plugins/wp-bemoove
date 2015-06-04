@@ -39,6 +39,11 @@ class BeMoOveTag {
 
         return $this->dbData->thumbnail_file;
     }
+	
+	
+	
+	
+	
 
     /**
      * サムネイル表示用のファイルパスを取得する。  -  
@@ -177,35 +182,20 @@ class BeMoOveTag {
         $isSocial = $this->isSocialShare();
         $logoFile = $this->getLogoFile();
         $logoLink = $this->getLogoLink();
+        $aspect = $this->get_aspect($showWidth,$showHeight);
 
-        $ret = "<div id=\"{$tagId}\">Loading the player...</div>
-<script type=\"text/javascript\">
-    var isAndroid = false;
-    var isIOS = false;
-    var ua = navigator.userAgent.toLowerCase();
-    if (ua.match(/Android/i)) var isAndroid = true;
-    if (ua.match(/iP(hone|ad|od)/i)) var isIOS = true;
-    if (!(isAndroid || isIOS)) {
-        jwplayer(\"{$tagId}\").setup({
-            file: \"".PROTOCOL."://{$behlsHostName}/media/video/{$accountId}/{$this->getName()}.m3u8\",
-            image: \"{$showThumbnailFile}\",
-            width: \"{$showWidth}\",
-            height: \"{$showHeight}\",
-            " . ($isSocial ? "sharing: {}," : "") . "
-            " . ((empty($logoFile) || empty($logoLink)) ? "" : "logo: { file: '{$logoFile}', link: '{$logoLink}' }") . "
-        });
-    } else {
-        document.getElementById(\"{$tagId}\").innerHTML
-            = \"\"
-            + \"<video id=myVideo\"
-            + \" src='".PROTOCOL."://{$behlsHostName}/media/video/{$accountId}/{$this->getName()}.m3u8' \"
-            + \" poster='{$showThumbnailFile}' \"
-            + \" width='{$showWidth}' height='{$showHeight}' \"
-            + \" onclick='this.play();' \"
-            + \" controls>\"
-            + \" </video>\";
-    }
-</script>";
+        $ret = "<div id=\"{$tagId}\">Loading the player...</div>"
+             . "<script type=\"text/javascript\">"
+             . "jwplayer(\"{$tagId}\").setup({"
+             . "file: \"".PROTOCOL."://{$behlsHostName}/media/video/{$accountId}/{$this->getName()}.m3u8\","
+             . "image: \"{$showThumbnailFile}\","
+             . "width: \"100%\","
+             . "aspectratio: \"{$aspect}\","
+             . "androidhls:true,"
+             . ($isSocial ? "sharing: {}," : "")
+             . ((empty($logoFile) || empty($logoLink)) ? "" : "logo: { file: '{$logoFile}', link: '{$logoLink}' }")
+             . "});"
+             . "</script>";
         return preg_replace('/^(\s)+\r\n/m', '',$ret);
     }
 
@@ -257,5 +247,39 @@ class BeMoOveTag {
                     . '<input type="hidden" value="' . $this->getName() . '" class="tag_name" />'
                     . '</div><br />';
     }
+	
+	
+	
+	
+/*
+動画サイズを取得し、横幅640にした場合の縦幅、アスペクト比を返す
+*/
+   function get_aspect($origin_width,$origin_height) {
+	
+		
+		$x = $origin_width/640;
+		
+		$y = round($origin_width/$origin_height,4);
+		
+		if($y < 1.2222){ $aspect = "1:1"; }
+		elseif($y >= 1.2222 && $y < 1.2500){ $aspect = "11:9"; }
+		elseif($y >= 1.2500 && $y < 1.3241){ $aspect = "5:4"; }
+		elseif($y >= 1.3241 && $y < 1.3333){ $aspect = "192:145"; }
+		elseif($y >= 1.3333 && $y < 1.4933){ $aspect = "4:3"; }
+		elseif($y >= 1.4933 && $y < 1.5000){ $aspect = "128:75"; }
+		elseif($y >= 1.5000 && $y < 1.6000){ $aspect = "3:2"; }
+		elseif($y >= 1.6000 && $y < 1.6667){ $aspect = "16:10"; }
+		elseif($y >= 1.6667 && $y < 1.7067){ $aspect = "15:9"; }
+		elseif($y >= 1.7067 && $y < 1.7600){ $aspect = "112:75"; }
+		elseif($y >= 1.7600 && $y < 1.7778){ $aspect = "16:9"; }
+		elseif($y >= 1.7778 && $y < 1.8286){ $aspect = "16:9"; }
+		elseif($y >= 1.8286 && $y < 1.8963){ $aspect = "64:35"; }
+		elseif($y >= 1.8963 && $y < 2.1333){ $aspect = "256:135"; }
+		elseif($y >= 2.1333){ $aspect = "32:15"; }
+		
+		return $aspect;
+	
+   }
+	
 }
 ?>
